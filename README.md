@@ -1,8 +1,13 @@
 # SuluArticleConfigurationBundle
+![php workflow](https://github.com/manuxi/SuluArticleConfigurationBundle/actions/workflows/php.yml/badge.svg)
+![symfony workflow](https://github.com/manuxi/SuluArticleConfigurationBundle/actions/workflows/symfony.yml/badge.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/manuxi/SuluArticleConfigurationBundle/LICENSE)
+![GitHub Tag](https://img.shields.io/github/v/tag/manuxi/SuluArticleConfigurationBundle)
+![Supports Sulu 3.0 or later](https://img.shields.io/badge/%20Sulu->=3.0-0088cc?color=00b2df)
 
 [🇩🇪 German Version](README.de.md)
 
-The **SuluArticleConfigurationBundle** extends Sulu Articles with a comprehensive "Configuration" tab.
+The **SuluArticleConfigurationBundle** extends Sulu 3.0 Articles with a comprehensive "Configuration" tab.
 It allows managing additional display options, features, and publication settings directly on the article.
 
 ## ✨ Features
