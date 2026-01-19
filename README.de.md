@@ -61,7 +61,6 @@ Füge Folgendes zu `config/routes.yaml` hinzu, um die Admin-API-Routen zu laden:
 ```yaml
 sulu_article_configuration_api:
     resource: '@SuluArticleConfigurationBundle/Resources/config/routes_admin.yaml'
-    prefix: /
 ```
 
 ### Schritt 3: Datenbank aktualisieren

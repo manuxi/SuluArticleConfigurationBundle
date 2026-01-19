@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[Route('/admin/api')]
 class ArticleConfigurationController extends AbstractRestController
 {
     public function __construct(
@@ -24,7 +25,7 @@ class ArticleConfigurationController extends AbstractRestController
     }
 
     #[Route(
-        path: '/admin/api/article-configurations/{id}',
+        path: '/article-configurations/{id}',
         name: 'app.get_article_configurations',
         methods: ['GET'],
         defaults: ['_format' => 'json']
@@ -41,7 +42,7 @@ class ArticleConfigurationController extends AbstractRestController
     }
 
     #[Route(
-        path: '/admin/api/article-configurations/{id}',
+        path: '/article-configurations/{id}',
         name: 'app.put_article_configurations',
         methods: ['PUT'],
         defaults: ['_format' => 'json']
