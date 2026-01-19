@@ -39,6 +39,8 @@ class ArticleConfigurationControllerTest extends TestCase
         $articleId = '123-456';
         $configuration = new ArticleConfiguration();
         $configuration->setArticleId($articleId);
+        $configuration->setLayoutStyle('wide');
+        $configuration->setEnableSidebar(false);
 
         $this->repository->expects($this->once())
             ->method('findOneBy')
@@ -47,8 +49,13 @@ class ArticleConfigurationControllerTest extends TestCase
 
         $this->viewHandler->expects($this->once())
             ->method('handle')
-            ->with($this->callback(function (View $view) use ($configuration) {
-                return $view->getData() === $configuration;
+            ->with($this->callback(function (View $view) use ($articleId) {
+                $data = $view->getData();
+                return \is_array($data)
+                    && $data['id'] === $articleId
+                    && $data['articleId'] === $articleId
+                    && $data['layoutStyle'] === 'wide'
+                    && $data['enableSidebar'] === false;
             }))
             ->willReturn(new Response());
 
@@ -68,7 +75,11 @@ class ArticleConfigurationControllerTest extends TestCase
             ->method('handle')
             ->with($this->callback(function (View $view) use ($articleId) {
                 $data = $view->getData();
-                return is_array($data) && $data['articleId'] === $articleId && $data['layoutStyle'] === 'default';
+                return \is_array($data)
+                    && $data['id'] === $articleId
+                    && $data['articleId'] === $articleId
+                    && $data['layoutStyle'] === 'default'
+                    && $data['enableSidebar'] === true;
             }))
             ->willReturn(new Response());
 
@@ -82,8 +93,9 @@ class ArticleConfigurationControllerTest extends TestCase
         $configuration->setArticleId($articleId);
 
         $request = new Request([], [], [], [], [], [], json_encode([
-            'layout_style' => 'wide',
-            'enable_sidebar' => false,
+            'layoutStyle' => 'wide',
+            'enableSidebar' => false,
+            'sidebarPosition' => 'left',
         ]));
 
         $this->repository->expects($this->once())
@@ -96,11 +108,13 @@ class ArticleConfigurationControllerTest extends TestCase
 
         $this->viewHandler->expects($this->once())
             ->method('handle')
-            ->with($this->callback(function (View $view) {
-                $config = $view->getData();
-                return $config instanceof ArticleConfiguration
-                    && $config->getLayoutStyle() === 'wide'
-                    && $config->isEnableSidebar() === false;
+            ->with($this->callback(function (View $view) use ($articleId) {
+                $data = $view->getData();
+                return \is_array($data)
+                    && $data['id'] === $articleId
+                    && $data['layoutStyle'] === 'wide'
+                    && $data['enableSidebar'] === false
+                    && $data['sidebarPosition'] === 'left';
             }))
             ->willReturn(new Response());
 
@@ -112,7 +126,8 @@ class ArticleConfigurationControllerTest extends TestCase
         $articleId = 'new-123';
 
         $request = new Request([], [], [], [], [], [], json_encode([
-            'layout_style' => 'fullwidth',
+            'layoutStyle' => 'fullwidth',
+            'isFeatured' => true,
         ]));
 
         $this->repository->expects($this->once())
@@ -129,8 +144,49 @@ class ArticleConfigurationControllerTest extends TestCase
 
         $this->viewHandler->expects($this->once())
             ->method('handle')
+            ->with($this->callback(function (View $view) use ($articleId) {
+                $data = $view->getData();
+                return \is_array($data)
+                    && $data['id'] === $articleId
+                    && $data['layoutStyle'] === 'fullwidth'
+                    && $data['isFeatured'] === true;
+            }))
             ->willReturn(new Response());
 
         $this->controller->putAction($articleId, $request);
+    }
+
+    public function testGetActionReturnsAllFields(): void
+    {
+        $articleId = 'test-uuid';
+
+        $this->repository->expects($this->once())
+            ->method('findOneBy')
+            ->willReturn(null);
+
+        $this->viewHandler->expects($this->once())
+            ->method('handle')
+            ->with($this->callback(function (View $view) {
+                $data = $view->getData();
+                $expectedFields = [
+                    'id', 'articleId', 'layoutStyle', 'showToc', 'showReadingTime',
+                    'showAuthorBox', 'showRelated', 'enableSidebar', 'sidebarPosition',
+                    'enableComments', 'enableShareButtons', 'enablePrint', 'enableDownloadPdf',
+                    'isFeatured', 'isSticky', 'hideFromLists', 'hidePublishDate',
+                    'customCssClass', 'headerBgColor', 'headerTextColor',
+                    'customTemplate', 'cacheLifetime', 'customData',
+                ];
+
+                foreach ($expectedFields as $field) {
+                    if (!\array_key_exists($field, $data)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }))
+            ->willReturn(new Response());
+
+        $this->controller->getAction($articleId);
     }
 }

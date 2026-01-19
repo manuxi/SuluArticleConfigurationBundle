@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Manuxi\SuluArticleConfigurationBundle\Repository\ArticleConfigurationRepository;
 
 #[ORM\Entity(repositoryClass: ArticleConfigurationRepository::class)]
-#[ORM\Table(name: 'article_configuration')]
+#[ORM\Table(name: 'ar_article_configuration')]
 class ArticleConfiguration
 {
     #[ORM\Id]

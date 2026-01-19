@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Manuxi\SuluArticleConfigurationBundle\DependencyInjection;
@@ -32,9 +33,10 @@ class SuluArticleConfigurationExtension extends Extension implements PrependExte
                 ]
             );
         }
+
         $container->loadFromExtension('framework', [
             'default_locale' => 'en',
-            'translator' => ['paths' => [__DIR__.'/../Resources/translations/']],
+            'translator' => ['paths' => [__DIR__ . '/../Resources/translations/']],
         ]);
     }
 

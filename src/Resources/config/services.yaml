@@ -22,10 +22,8 @@ services:
     Manuxi\SuluArticleConfigurationBundle\Admin\ArticleConfigurationAdmin:
         arguments:
             - '@sulu_admin.view_builder_factory'
-            - '@sulu.core.localization_manager'
             - '@sulu_admin.metadata_group_provider'
             - '@sulu_security.security_checker'
         tags:
             - { name: 'sulu.admin', priority: -10 }
             - { name: 'sulu.context', context: 'admin' }
-
