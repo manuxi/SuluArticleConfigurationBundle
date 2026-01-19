@@ -1,0 +1,31 @@
+services:
+    _defaults:
+        autowire: false
+        autoconfigure: false
+        public: false
+
+    Manuxi\SuluArticleConfigurationBundle\Repository\ArticleConfigurationRepository:
+        arguments:
+            - '@doctrine'
+        tags:
+            - { name: 'doctrine.repository_service' }
+
+    Manuxi\SuluArticleConfigurationBundle\Controller\Admin\ArticleConfigurationController:
+        public: true
+        arguments:
+            - '@Manuxi\SuluArticleConfigurationBundle\Repository\ArticleConfigurationRepository'
+            - '@doctrine.orm.entity_manager'
+            - '@fos_rest.view_handler'
+        tags:
+            - { name: 'sulu.context', context: 'admin' }
+
+    Manuxi\SuluArticleConfigurationBundle\Admin\ArticleConfigurationAdmin:
+        arguments:
+            - '@sulu_admin.view_builder_factory'
+            - '@sulu.core.localization_manager'
+            - '@sulu_admin.metadata_group_provider'
+            - '@sulu_security.security_checker'
+        tags:
+            - { name: 'sulu.admin', priority: -10 }
+            - { name: 'sulu.context', context: 'admin' }
+

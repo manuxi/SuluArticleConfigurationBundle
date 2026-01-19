@@ -1,0 +1,53 @@
+sulu_article_configuration:
+    display_options: "Darstellungs-Optionen"
+    layout_style:
+        title: "Layout-Stil"
+        default: "Standard"
+        wide: "Breit"
+        fullwidth: "Volle Breite"
+        narrow: "Schmal (Reading Mode)"
+    enable_sidebar:
+        title: "Sidebar aktivieren"
+        info: "Zeigt Sidebar mit TOC/Related Content"
+    sidebar_position:
+        title: "Sidebar Position"
+        left: "Links"
+        right: "Rechts"
+    show_toc: "Inhaltsverzeichnis anzeigen"
+    show_reading_time: "Lesezeit anzeigen"
+    show_author_box: "Autorenbox anzeigen"
+    show_related: "Ähnliche Artikel anzeigen"
+    features: "Features & Interaktionen"
+    enable_comments: "Kommentare erlauben"
+    enable_share_buttons: "Teilen-Buttons anzeigen"
+    enable_print: "Drucken-Button anzeigen"
+    enable_download_pdf: "PDF-Download erlauben"
+    publication_settings: "Veröffentlichungs-Einstellungen"
+    is_featured:
+        title: "Hervorgehoben (Featured)"
+        info: "Artikel wird in Featured-Listen bevorzugt angezeigt."
+    is_sticky:
+        title: "Oben halten (Sticky)"
+        info: "Artikel bleibt in Listen immer oben."
+    hide_from_lists:
+        title: "In Listen verbergen"
+        info: "Artikel ist aufrufbar, taucht aber nicht in Übersichten auf."
+    hide_publish_date: "Veröffentlichungsdatum verbergen"
+    styling: "Design & Styling"
+    custom_css_class:
+        title: "CSS Klasse"
+        info: "Benutzerdefinierte CSS-Klasse für den Artikel-Container."
+    header_bg_color: "Header Hintergrundfarbe"
+    header_text_color:
+        title: "Header Textfarbe"
+        auto: "Automatisch"
+        light: "Hell"
+        dark: "Dunkel"
+    advanced: "Erweitert"
+    custom_template:
+        title: "Individuelles Template"
+        info: "Pfad zum Twig-Template (z.B. articles/special.html.twig)."
+    cache_lifetime: "Cache Lebensdauer (Sekunden)"
+    custom_data:
+        title: "Benutzerdefinierte Daten (JSON)"
+        info: "Zusätzliche Daten als JSON-Objekt."

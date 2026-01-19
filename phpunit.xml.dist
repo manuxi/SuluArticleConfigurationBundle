@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/schema/9.3/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         executionOrder="random"
+         failOnWarning="false"
+         failOnRisky="false"
+         beStrictAboutOutputDuringTests="true"
+         backupGlobals="false">
+
+  <php>
+    <ini name="error_reporting" value="-1"/>
+    <ini name="intl.default_locale" value="en"/>
+    <ini name="intl.error_level" value="0"/>
+    <ini name="memory_limit" value="-1"/>
+
+    <!-- Suppress ALL deprecation warnings -->
+    <env name="SYMFONY_DEPRECATIONS_HELPER" value="disabled"/>
+
+    <server name="APP_ENV" value="test" force="true"/>
+    <server name="KERNEL_CLASS" value="Kernel"/>
+  </php>
+
+  <testsuites>
+    <testsuite name="Unit Tests">
+      <directory>tests/Unit</directory>
+    </testsuite>
+  </testsuites>
+
+  <coverage processUncoveredFiles="true">
+    <include>
+      <directory suffix=".php">src</directory>
+    </include>
+    <exclude>
+      <directory>src/Migrations</directory>
+      <directory>src/DataFixtures</directory>
+      <directory>src/DependencyInjection</directory>
+      <file>src/SuluArticleConfigurationBundle.php</file>
+    </exclude>
+  </coverage>
+</phpunit>

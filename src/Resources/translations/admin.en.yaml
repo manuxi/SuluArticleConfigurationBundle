@@ -1,0 +1,53 @@
+sulu_article_configuration:
+    display_options: "Display Options"
+    layout_style:
+        title: "Layout Style"
+        default: "Default"
+        wide: "Wide"
+        fullwidth: "Full Width"
+        narrow: "Narrow (Reading Mode)"
+    enable_sidebar:
+        title: "Enable Sidebar"
+        info: "Shows sidebar with TOC/Related Content"
+    sidebar_position:
+        title: "Sidebar Position"
+        left: "Left"
+        right: "Right"
+    show_toc: "Show Table of Contents"
+    show_reading_time: "Show Reading Time"
+    show_author_box: "Show Author Box"
+    show_related: "Show Related Articles"
+    features: "Features & Interactions"
+    enable_comments: "Enable Comments"
+    enable_share_buttons: "Show Share Buttons"
+    enable_print: "Show Print Button"
+    enable_download_pdf: "Allow PDF Download"
+    publication_settings: "Publication Settings"
+    is_featured:
+        title: "Featured"
+        info: "Article is prioritized in featured lists."
+    is_sticky:
+        title: "Sticky"
+        info: "Article stays at the top of lists."
+    hide_from_lists:
+        title: "Hide from Lists"
+        info: "Article is accessible but does not appear in overviews."
+    hide_publish_date: "Hide Publication Date"
+    styling: "Design & Styling"
+    custom_css_class:
+        title: "CSS Class"
+        info: "Custom CSS class for the article container."
+    header_bg_color: "Header Background Color"
+    header_text_color:
+        title: "Header Text Color"
+        auto: "Auto"
+        light: "Light"
+        dark: "Dark"
+    advanced: "Advanced"
+    custom_template:
+        title: "Custom Template"
+        info: "Path to Twig template (e.g. articles/special.html.twig)."
+    cache_lifetime: "Cache Lifetime (seconds)"
+    custom_data:
+        title: "Custom Data (JSON)"
+        info: "Additional data as JSON object."

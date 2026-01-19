@@ -1,0 +1,5 @@
+sulu_article_configuration_api:
+    resource: Manuxi\SuluArticleConfigurationBundle\Controller\Admin\ArticleConfigurationController
+    type: attribute
+    options:
+        expose: true
