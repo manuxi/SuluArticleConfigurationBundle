@@ -17,4 +17,36 @@ class ArticleConfigurationRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, ArticleConfiguration::class);
     }
+
+    public function findByArticleId(string $articleId): ?ArticleConfiguration
+    {
+        return $this->findOneBy(['articleId' => $articleId]);
+    }
+
+    public function findDefaultForTemplate(string $templateKey): ?ArticleConfiguration
+    {
+        return $this->findOneBy([
+            'templateKey' => $templateKey,
+            'default' => true,
+        ]);
+    }
+
+    public function clearDefaultsForTemplate(string $templateKey, ?string $excludeArticleId = null): void
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->update()
+            ->set('c.default', ':false')
+            ->where('c.templateKey = :templateKey')
+            ->andWhere('c.default = :true')
+            ->setParameter('false', false)
+            ->setParameter('true', true)
+            ->setParameter('templateKey', $templateKey);
+
+        if ($excludeArticleId) {
+            $qb->andWhere('c.articleId != :excludeId')
+                ->setParameter('excludeId', $excludeArticleId);
+        }
+
+        $qb->getQuery()->execute();
+    }
 }

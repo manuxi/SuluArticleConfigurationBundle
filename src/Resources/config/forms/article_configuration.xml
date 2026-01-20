@@ -5,6 +5,24 @@
 >
     <key>article_configuration</key>
     <properties>
+        <section name="template_default">
+            <meta>
+                <title>sulu_article_configuration.template_default</title>
+            </meta>
+            <properties>
+                <property name="default" type="checkbox" colspan="6">
+                    <meta>
+                        <title>sulu_article_configuration.default.title</title>
+                        <info_text>sulu_article_configuration.default.info</info_text>
+                    </meta>
+                    <params>
+                        <param name="type" value="toggler"/>
+                        <param name="default_value" value="false"/>
+                    </params>
+                </property>
+            </properties>
+        </section>
+
         <section name="display_options">
             <meta>
                 <title>sulu_article_configuration.display_options</title>

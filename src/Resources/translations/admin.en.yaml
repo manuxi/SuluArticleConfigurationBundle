@@ -1,5 +1,9 @@
 sulu_article_configuration:
     title: "Configuration"
+    template_default: "Default Configuration"
+    default:
+        title: "Use as default"
+        info: "This configuration will be used as default for all articles with this template, unless they have their own configuration."
     display_options: "Display"
     sidebar_options: "Sidebar"
     layout_style:

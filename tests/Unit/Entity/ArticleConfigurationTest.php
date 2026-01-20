@@ -11,58 +11,124 @@ class ArticleConfigurationTest extends TestCase
 {
     public function testDefaults(): void
     {
-        $entity = new ArticleConfiguration();
+        $configuration = new ArticleConfiguration();
+        $configuration->setArticleId('test-id');
 
-        $this->assertNull($entity->getId());
-        $this->assertNull($entity->getArticleId());
-        $this->assertEquals('default', $entity->getLayoutStyle());
-        $this->assertTrue($entity->isEnableSidebar());
-        $this->assertEquals('right', $entity->getSidebarPosition());
-        $this->assertTrue($entity->isShowToc());
-        $this->assertTrue($entity->isShowReadingTime());
-        $this->assertTrue($entity->isShowAuthorBox());
-        $this->assertTrue($entity->isShowRelated());
-        $this->assertFalse($entity->isEnableComments());
-        $this->assertTrue($entity->isEnableShareButtons());
-        $this->assertTrue($entity->isEnablePrint());
-        $this->assertFalse($entity->isEnableDownloadPdf());
-        $this->assertFalse($entity->isFeatured());
-        $this->assertFalse($entity->isSticky());
-        $this->assertFalse($entity->isHideFromLists());
-        $this->assertFalse($entity->isHidePublishDate());
-        $this->assertEquals('auto', $entity->getHeaderTextColor());
+        $this->assertSame('test-id', $configuration->getArticleId());
+        $this->assertNull($configuration->getTemplateKey());
+        $this->assertFalse($configuration->isDefault());
+        $this->assertSame('default', $configuration->getLayoutStyle());
+        $this->assertTrue($configuration->isEnableSidebar());
+        $this->assertSame('right', $configuration->getSidebarPosition());
+        $this->assertTrue($configuration->isShowToc());
+        $this->assertTrue($configuration->isShowReadingTime());
+        $this->assertTrue($configuration->isShowAuthorBox());
+        $this->assertTrue($configuration->isShowRelated());
+        $this->assertFalse($configuration->isEnableComments());
+        $this->assertTrue($configuration->isEnableShareButtons());
+        $this->assertTrue($configuration->isEnablePrint());
+        $this->assertFalse($configuration->isEnableDownloadPdf());
+        $this->assertFalse($configuration->isFeatured());
+        $this->assertFalse($configuration->isSticky());
+        $this->assertFalse($configuration->isHideFromLists());
+        $this->assertFalse($configuration->isHidePublishDate());
+        $this->assertNull($configuration->getCustomCssClass());
+        $this->assertNull($configuration->getHeaderBgColor());
+        $this->assertSame('auto', $configuration->getHeaderTextColor());
+        $this->assertNull($configuration->getCustomTemplate());
+        $this->assertSame(86400, $configuration->getCacheLifetime());
+        $this->assertNull($configuration->getCustomData());
     }
 
     public function testSettersAndGetters(): void
     {
-        $entity = new ArticleConfiguration();
+        $configuration = new ArticleConfiguration();
 
-        $entity->setArticleId('123-456');
-        $this->assertEquals('123-456', $entity->getArticleId());
+        $configuration->setArticleId('article-123');
+        $this->assertSame('article-123', $configuration->getArticleId());
 
-        $entity->setLayoutStyle('wide');
-        $this->assertEquals('wide', $entity->getLayoutStyle());
+        $configuration->setTemplateKey('article_blog');
+        $this->assertSame('article_blog', $configuration->getTemplateKey());
 
-        $entity->setEnableSidebar(false);
-        $this->assertFalse($entity->isEnableSidebar());
+        $configuration->setDefault(true);
+        $this->assertTrue($configuration->isDefault());
 
-        $entity->setSidebarPosition('left');
-        $this->assertEquals('left', $entity->getSidebarPosition());
+        $configuration->setLayoutStyle('wide');
+        $this->assertSame('wide', $configuration->getLayoutStyle());
 
-        $entity->setCustomCssClass('my-class');
-        $this->assertEquals('my-class', $entity->getCustomCssClass());
+        $configuration->setEnableSidebar(false);
+        $this->assertFalse($configuration->isEnableSidebar());
 
-        $entity->setHeaderBgColor('#ffffff');
-        $this->assertEquals('#ffffff', $entity->getHeaderBgColor());
+        $configuration->setSidebarPosition('left');
+        $this->assertSame('left', $configuration->getSidebarPosition());
 
-        $entity->setCustomTemplate('test.html.twig');
-        $this->assertEquals('test.html.twig', $entity->getCustomTemplate());
+        $configuration->setShowToc(false);
+        $this->assertFalse($configuration->isShowToc());
 
-        $entity->setCacheLifetime(3600);
-        $this->assertEquals(3600, $entity->getCacheLifetime());
+        $configuration->setShowReadingTime(false);
+        $this->assertFalse($configuration->isShowReadingTime());
 
-        $data = json_encode(['foo' => 'bar']);
-        $entity->setCustomData($data);
-        $this->assertEquals($data, $entity->getCustomData());
+        $configuration->setShowAuthorBox(false);
+        $this->assertFalse($configuration->isShowAuthorBox());
+
+        $configuration->setShowRelated(false);
+        $this->assertFalse($configuration->isShowRelated());
+
+        $configuration->setEnableComments(true);
+        $this->assertTrue($configuration->isEnableComments());
+
+        $configuration->setEnableShareButtons(false);
+        $this->assertFalse($configuration->isEnableShareButtons());
+
+        $configuration->setEnablePrint(false);
+        $this->assertFalse($configuration->isEnablePrint());
+
+        $configuration->setEnableDownloadPdf(true);
+        $this->assertTrue($configuration->isEnableDownloadPdf());
+
+        $configuration->setIsFeatured(true);
+        $this->assertTrue($configuration->isFeatured());
+
+        $configuration->setIsSticky(true);
+        $this->assertTrue($configuration->isSticky());
+
+        $configuration->setHideFromLists(true);
+        $this->assertTrue($configuration->isHideFromLists());
+
+        $configuration->setHidePublishDate(true);
+        $this->assertTrue($configuration->isHidePublishDate());
+
+        $configuration->setCustomCssClass('my-class');
+        $this->assertSame('my-class', $configuration->getCustomCssClass());
+
+        $configuration->setHeaderBgColor('#ff0000');
+        $this->assertSame('#ff0000', $configuration->getHeaderBgColor());
+
+        $configuration->setHeaderTextColor('light');
+        $this->assertSame('light', $configuration->getHeaderTextColor());
+
+        $configuration->setCustomTemplate('articles/special.html.twig');
+        $this->assertSame('articles/special.html.twig', $configuration->getCustomTemplate());
+
+        $configuration->setCacheLifetime(3600);
+        $this->assertSame(3600, $configuration->getCacheLifetime());
+
+        $configuration->setCustomData('{"key": "value"}');
+        $this->assertSame('{"key": "value"}', $configuration->getCustomData());
+    }
+
+    public function testFluentInterface(): void
+    {
+        $configuration = new ArticleConfiguration();
+
+        $result = $configuration
+            ->setArticleId('test')
+            ->setTemplateKey('blog')
+            ->setDefault(true)
+            ->setLayoutStyle('wide')
+            ->setEnableSidebar(true)
+            ->setSidebarPosition('left');
+
+        $this->assertSame($configuration, $result);
     }
 }

@@ -10,11 +10,24 @@ services:
         tags:
             - { name: 'doctrine.repository_service' }
 
+    Manuxi\SuluArticleConfigurationBundle\Service\ArticleConfigurationResolver:
+        public: true
+        arguments:
+            - '@Manuxi\SuluArticleConfigurationBundle\Repository\ArticleConfigurationRepository'
+
+    Manuxi\SuluArticleConfigurationBundle\Twig\ArticleConfigurationExtension:
+        arguments:
+            - '@Manuxi\SuluArticleConfigurationBundle\Service\ArticleConfigurationResolver'
+        tags:
+            - { name: 'twig.extension' }
+
     Manuxi\SuluArticleConfigurationBundle\Controller\Admin\ArticleConfigurationController:
         public: true
         arguments:
             - '@Manuxi\SuluArticleConfigurationBundle\Repository\ArticleConfigurationRepository'
             - '@doctrine.orm.entity_manager'
+            - '@sulu_article.article_repository'
+            - '@Sulu\Content\Application\ContentAggregator\ContentAggregatorInterface'
             - '@fos_rest.view_handler'
         tags:
             - { name: 'sulu.context', context: 'admin' }

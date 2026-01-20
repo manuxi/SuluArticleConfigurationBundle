@@ -14,11 +14,11 @@ use Sulu\Component\Security\Authorization\SecurityCheckerInterface;
 
 class ArticleConfigurationAdminTest extends TestCase
 {
-    private $viewBuilderFactory;
-    private $groupProvider;
-    private $securityChecker;
-    private $admin;
-    private $viewCollection;
+    private ViewBuilderFactoryInterface $viewBuilderFactory;
+    private GroupProviderInterface $groupProvider;
+    private SecurityCheckerInterface $securityChecker;
+    private ArticleConfigurationAdmin $admin;
+    private ViewCollection $viewCollection;
 
     protected function setUp(): void
     {

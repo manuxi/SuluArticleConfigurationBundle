@@ -1,5 +1,9 @@
 sulu_article_configuration:
     title: "Konfiguration"
+    template_default: "Standard-Konfiguration"
+    default:
+        title: "Als Standard verwenden"
+        info: "Diese Konfiguration wird als Standard für alle Artikel mit diesem Template verwendet, sofern dort keine eigene Konfiguration existiert."
     display_options: "Darstellung"
     sidebar_options: "Sidebar"
     layout_style:
