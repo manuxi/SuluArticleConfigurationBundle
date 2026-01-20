@@ -10,6 +10,8 @@
 The **SuluArticleConfigurationBundle** extends Sulu 3.0 Articles with a comprehensive "Configuration" tab.
 It allows managing additional display options, features, and publication settings directly on the article.
 
+![img.png](docs/img/overview.png)
+
 ## ✨ Features
 
 ### 📋 Display Options
