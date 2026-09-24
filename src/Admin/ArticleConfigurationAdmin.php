@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Manuxi\SuluArticleConfigurationBundle\Admin;
 
+use Sulu\Article\Domain\Model\ArticleInterface;
 use Sulu\Article\Infrastructure\Sulu\Admin\ArticleAdmin;
 use Sulu\Bundle\AdminBundle\Admin\Admin;
 use Sulu\Bundle\AdminBundle\Admin\View\ToolbarAction;
@@ -31,9 +32,19 @@ class ArticleConfigurationAdmin extends Admin
             && (false === $checkGroup || $this->securityChecker->hasPermission(ArticleAdmin::getArticleSecurityContext($groupIdentifier), $permission));
     }
 
+    /**
+     * Sulu >= 3.0.9 expects the template type; earlier 3.0 dev builds take no argument.
+     */
+    private function getGroups(): array
+    {
+        return (new \ReflectionMethod($this->groupProvider, 'getGroups'))->getNumberOfParameters() > 0
+            ? $this->groupProvider->getGroups(ArticleInterface::TEMPLATE_TYPE)
+            : $this->groupProvider->getGroups();
+    }
+
     public function configureViews(ViewCollection $viewCollection): void
     {
-        $groups = $this->groupProvider->getGroups();
+        $groups = $this->getGroups();
 
         foreach ($groups as $group) {
             $securityContext = ArticleAdmin::getArticleSecurityContext($group->identifier);
