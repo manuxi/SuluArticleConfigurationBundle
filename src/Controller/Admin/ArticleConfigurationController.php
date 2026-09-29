@@ -75,7 +75,7 @@ class ArticleConfigurationController extends AbstractRestController
         }
         $configuration->setDefault($default);
 
-        $configuration->setLayoutStyle($data['layoutStyle'] ?? 'default');
+        $configuration->setLayoutStyle($data['layoutStyle'] ?? 'fullwidth');
         $configuration->setShowToc($data['showToc'] ?? true);
         $configuration->setShowReadingTime($data['showReadingTime'] ?? true);
         $configuration->setShowAuthorBox($data['showAuthorBox'] ?? true);
@@ -84,23 +84,13 @@ class ArticleConfigurationController extends AbstractRestController
         $configuration->setEnableSidebar($data['enableSidebar'] ?? true);
         $configuration->setSidebarPosition($data['sidebarPosition'] ?? 'right');
 
-        $configuration->setEnableComments($data['enableComments'] ?? false);
         $configuration->setEnableShareButtons($data['enableShareButtons'] ?? true);
         $configuration->setEnablePrint($data['enablePrint'] ?? true);
         $configuration->setEnableDownloadPdf($data['enableDownloadPdf'] ?? false);
 
-        $configuration->setIsFeatured($data['isFeatured'] ?? false);
-        $configuration->setIsSticky($data['isSticky'] ?? false);
-        $configuration->setHideFromLists($data['hideFromLists'] ?? false);
         $configuration->setHidePublishDate($data['hidePublishDate'] ?? false);
 
         $configuration->setCustomCssClass($data['customCssClass'] ?? null);
-        $configuration->setHeaderBgColor($data['headerBgColor'] ?? null);
-        $configuration->setHeaderTextColor($data['headerTextColor'] ?? 'auto');
-
-        $configuration->setCustomTemplate($data['customTemplate'] ?? null);
-        $configuration->setCacheLifetime(isset($data['cacheLifetime']) ? (int) $data['cacheLifetime'] : 86400);
-        $configuration->setCustomData($data['customData'] ?? null);
 
         $this->entityManager->flush();
 
@@ -145,27 +135,18 @@ class ArticleConfigurationController extends AbstractRestController
             'articleId' => $id,
             'templateKey' => null,
             'default' => false,
-            'layoutStyle' => 'default',
+            'layoutStyle' => 'fullwidth',
             'showToc' => true,
             'showReadingTime' => true,
             'showAuthorBox' => true,
             'showRelated' => true,
             'enableSidebar' => true,
             'sidebarPosition' => 'right',
-            'enableComments' => false,
             'enableShareButtons' => true,
             'enablePrint' => true,
             'enableDownloadPdf' => false,
-            'isFeatured' => false,
-            'isSticky' => false,
-            'hideFromLists' => false,
             'hidePublishDate' => false,
             'customCssClass' => null,
-            'headerBgColor' => null,
-            'headerTextColor' => 'auto',
-            'customTemplate' => null,
-            'cacheLifetime' => 86400,
-            'customData' => null,
         ];
     }
 
@@ -183,20 +164,11 @@ class ArticleConfigurationController extends AbstractRestController
             'showRelated' => $configuration->isShowRelated(),
             'enableSidebar' => $configuration->isEnableSidebar(),
             'sidebarPosition' => $configuration->getSidebarPosition(),
-            'enableComments' => $configuration->isEnableComments(),
             'enableShareButtons' => $configuration->isEnableShareButtons(),
             'enablePrint' => $configuration->isEnablePrint(),
             'enableDownloadPdf' => $configuration->isEnableDownloadPdf(),
-            'isFeatured' => $configuration->isFeatured(),
-            'isSticky' => $configuration->isSticky(),
-            'hideFromLists' => $configuration->isHideFromLists(),
             'hidePublishDate' => $configuration->isHidePublishDate(),
             'customCssClass' => $configuration->getCustomCssClass(),
-            'headerBgColor' => $configuration->getHeaderBgColor(),
-            'headerTextColor' => $configuration->getHeaderTextColor(),
-            'customTemplate' => $configuration->getCustomTemplate(),
-            'cacheLifetime' => $configuration->getCacheLifetime(),
-            'customData' => $configuration->getCustomData(),
         ];
     }
 }

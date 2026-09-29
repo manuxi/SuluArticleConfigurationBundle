@@ -20,17 +20,14 @@ Es ermöglicht die Verwaltung zusätzlicher Darstellungsoptionen, Features und V
 - **Elemente anzeigen** - Inhaltsverzeichnis (TOC), Lesezeit, Autor-Box, Ähnliche Artikel
 
 ### ⚙️ Funktionen & Features
-- **Interaktionen** - Kommentare, Share-Buttons
+- **Interaktionen** - Share-Buttons
 - **Tools** - Druck-Funktion, PDF-Download
 
 ### 🚀 Veröffentlichungs-Einstellungen
-- **Highlighting** - "Hervorgehoben" (für Slider/Teaser)
-- **Listen-Verhalten** - "Fixiert" (Sticky) oder "Aus Listen ausblenden" (nur direkt aufrufbar)
 - **Metadaten** - Veröffentlichungsdatum ausblenden
 
 ### 🎨 Styling & Erweitert
-- **Design** - Header Hintergrund- und Textfarbe, Custom CSS Klassen
-- **Technik** - Custom Template Zuweisung, Cache Lifetime, Custom JSON Data
+- **Design** - Custom CSS Klassen
 
 ### 🔄 Standard-Konfiguration für Templates
 - **Vererbungs-System** - Setze eine Standard-Konfiguration für alle Artikel desselben Templates
@@ -170,27 +167,18 @@ Das Bundle stellt eine Twig-Funktion bereit, um die Konfiguration in Twig-Templa
 
 | Eigenschaft | Typ | Standard | Beschreibung |
 |-------------|-----|----------|--------------|
-| `layoutStyle` | string | `'default'` | `default`, `wide`, `fullwidth`, `narrow` |
+| `layoutStyle` | string | `'fullwidth'` | `default`, `wide`, `fullwidth`, `narrow` |
 | `enableSidebar` | bool | `true` | Sidebar anzeigen |
 | `sidebarPosition` | string | `'right'` | `left`, `right` |
 | `showToc` | bool | `true` | Inhaltsverzeichnis anzeigen |
 | `showReadingTime` | bool | `true` | Lesezeit anzeigen |
 | `showAuthorBox` | bool | `true` | Autor-Box anzeigen |
 | `showRelated` | bool | `true` | Ähnliche Artikel anzeigen |
-| `enableComments` | bool | `false` | Kommentare aktivieren |
 | `enableShareButtons` | bool | `true` | Teilen-Buttons anzeigen |
 | `enablePrint` | bool | `true` | Drucken-Button anzeigen |
 | `enableDownloadPdf` | bool | `false` | PDF-Download anzeigen |
-| `isFeatured` | bool | `false` | Hervorgehobener Artikel |
-| `isSticky` | bool | `false` | In Listen fixiert |
-| `hideFromLists` | bool | `false` | Aus Listen ausblenden |
 | `hidePublishDate` | bool | `false` | Veröffentlichungsdatum verbergen |
 | `customCssClass` | string | `null` | Eigene CSS-Klasse |
-| `headerBgColor` | string | `null` | Header Hintergrundfarbe |
-| `headerTextColor` | string | `'auto'` | `auto`, `light`, `dark` |
-| `customTemplate` | string | `null` | Pfad zum eigenen Template |
-| `cacheLifetime` | int | `86400` | Cache-Lebensdauer in Sekunden |
-| `customData` | string | `null` | Eigene JSON-Daten |
 | `configSource` | string | - | `article`, `template_default`, `hardcoded` |
 
 **Beispiel: Bedingtes Sidebar-Layout**
@@ -213,16 +201,12 @@ Das Bundle stellt eine Twig-Funktion bereit, um die Konfiguration in Twig-Templa
 </div>
 ```
 
-**Beispiel: Eigenes Header-Styling**
+**Beispiel: Eigene CSS-Klasse**
 
 ```twig
-{% set config = article_configuration(article.id, article.templateKey) %}
+{% set articleConfig = article_configuration(article.id, article.templateKey) %}
 
-<header class="article-header" 
-    {% if articleConfig.headerBgColor %}
-        style="background-color: {{ articleConfig.headerBgColor }}; 
-               color: {% if articleConfig.headerTextColor == 'light' %}#fff{% elseif articleConfig.headerTextColor == 'dark' %}#000{% else %}inherit{% endif %};"
-    {% endif %}>
+<header class="article-header{% if articleConfig.customCssClass %} {{ articleConfig.customCssClass }}{% endif %}">
     <h1>{{ article.title }}</h1>
 </header>
 ```

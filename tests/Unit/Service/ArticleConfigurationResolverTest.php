@@ -92,7 +92,7 @@ class ArticleConfigurationResolverTest extends TestCase
         $result = $this->resolver->resolve($articleId, $templateKey);
 
         $this->assertEquals('hardcoded', $result['configSource']);
-        $this->assertEquals('default', $result['layoutStyle']);
+        $this->assertEquals('fullwidth', $result['layoutStyle']);
         $this->assertEquals($templateKey, $result['templateKey']);
     }
 

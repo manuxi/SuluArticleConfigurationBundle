@@ -48,9 +48,6 @@ class ArticleConfiguration
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => true])]
     private bool $showRelated = true;
 
-    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
-    private bool $enableComments = false;
-
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => true])]
     private bool $enableShareButtons = true;
 
@@ -61,34 +58,10 @@ class ArticleConfiguration
     private bool $enableDownloadPdf = false;
 
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
-    private bool $isFeatured = false;
-
-    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
-    private bool $isSticky = false;
-
-    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
-    private bool $hideFromLists = false;
-
-    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
     private bool $hidePublishDate = false;
 
     #[ORM\Column(type: Types::STRING, length: 128, nullable: true)]
     private ?string $customCssClass = null;
-
-    #[ORM\Column(type: Types::STRING, length: 32, nullable: true)]
-    private ?string $headerBgColor = null;
-
-    #[ORM\Column(type: Types::STRING, length: 16, options: ['default' => 'auto'])]
-    private string $headerTextColor = 'auto';
-
-    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
-    private ?string $customTemplate = null;
-
-    #[ORM\Column(type: Types::INTEGER, options: ['default' => 86400])]
-    private int $cacheLifetime = 86400;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $customData = null;
 
     public function getId(): ?int
     {
@@ -205,17 +178,6 @@ class ArticleConfiguration
         return $this;
     }
 
-    public function isEnableComments(): bool
-    {
-        return $this->enableComments;
-    }
-
-    public function setEnableComments(bool $enableComments): self
-    {
-        $this->enableComments = $enableComments;
-        return $this;
-    }
-
     public function isEnableShareButtons(): bool
     {
         return $this->enableShareButtons;
@@ -249,39 +211,6 @@ class ArticleConfiguration
         return $this;
     }
 
-    public function isFeatured(): bool
-    {
-        return $this->isFeatured;
-    }
-
-    public function setIsFeatured(bool $isFeatured): self
-    {
-        $this->isFeatured = $isFeatured;
-        return $this;
-    }
-
-    public function isSticky(): bool
-    {
-        return $this->isSticky;
-    }
-
-    public function setIsSticky(bool $isSticky): self
-    {
-        $this->isSticky = $isSticky;
-        return $this;
-    }
-
-    public function isHideFromLists(): bool
-    {
-        return $this->hideFromLists;
-    }
-
-    public function setHideFromLists(bool $hideFromLists): self
-    {
-        $this->hideFromLists = $hideFromLists;
-        return $this;
-    }
-
     public function isHidePublishDate(): bool
     {
         return $this->hidePublishDate;
@@ -304,58 +233,4 @@ class ArticleConfiguration
         return $this;
     }
 
-    public function getHeaderBgColor(): ?string
-    {
-        return $this->headerBgColor;
-    }
-
-    public function setHeaderBgColor(?string $headerBgColor): self
-    {
-        $this->headerBgColor = $headerBgColor;
-        return $this;
-    }
-
-    public function getHeaderTextColor(): string
-    {
-        return $this->headerTextColor;
-    }
-
-    public function setHeaderTextColor(string $headerTextColor): self
-    {
-        $this->headerTextColor = $headerTextColor;
-        return $this;
-    }
-
-    public function getCustomTemplate(): ?string
-    {
-        return $this->customTemplate;
-    }
-
-    public function setCustomTemplate(?string $customTemplate): self
-    {
-        $this->customTemplate = $customTemplate;
-        return $this;
-    }
-
-    public function getCacheLifetime(): int
-    {
-        return $this->cacheLifetime;
-    }
-
-    public function setCacheLifetime(int $cacheLifetime): self
-    {
-        $this->cacheLifetime = $cacheLifetime;
-        return $this;
-    }
-
-    public function getCustomData(): ?string
-    {
-        return $this->customData;
-    }
-
-    public function setCustomData(?string $customData): self
-    {
-        $this->customData = $customData;
-        return $this;
-    }
 }

@@ -24,20 +24,11 @@ class ArticleConfigurationTest extends TestCase
         $this->assertTrue($configuration->isShowReadingTime());
         $this->assertTrue($configuration->isShowAuthorBox());
         $this->assertTrue($configuration->isShowRelated());
-        $this->assertFalse($configuration->isEnableComments());
         $this->assertTrue($configuration->isEnableShareButtons());
         $this->assertTrue($configuration->isEnablePrint());
         $this->assertFalse($configuration->isEnableDownloadPdf());
-        $this->assertFalse($configuration->isFeatured());
-        $this->assertFalse($configuration->isSticky());
-        $this->assertFalse($configuration->isHideFromLists());
         $this->assertFalse($configuration->isHidePublishDate());
         $this->assertNull($configuration->getCustomCssClass());
-        $this->assertNull($configuration->getHeaderBgColor());
-        $this->assertSame('auto', $configuration->getHeaderTextColor());
-        $this->assertNull($configuration->getCustomTemplate());
-        $this->assertSame(86400, $configuration->getCacheLifetime());
-        $this->assertNull($configuration->getCustomData());
     }
 
     public function testSettersAndGetters(): void
@@ -74,9 +65,6 @@ class ArticleConfigurationTest extends TestCase
         $configuration->setShowRelated(false);
         $this->assertFalse($configuration->isShowRelated());
 
-        $configuration->setEnableComments(true);
-        $this->assertTrue($configuration->isEnableComments());
-
         $configuration->setEnableShareButtons(false);
         $this->assertFalse($configuration->isEnableShareButtons());
 
@@ -86,35 +74,11 @@ class ArticleConfigurationTest extends TestCase
         $configuration->setEnableDownloadPdf(true);
         $this->assertTrue($configuration->isEnableDownloadPdf());
 
-        $configuration->setIsFeatured(true);
-        $this->assertTrue($configuration->isFeatured());
-
-        $configuration->setIsSticky(true);
-        $this->assertTrue($configuration->isSticky());
-
-        $configuration->setHideFromLists(true);
-        $this->assertTrue($configuration->isHideFromLists());
-
         $configuration->setHidePublishDate(true);
         $this->assertTrue($configuration->isHidePublishDate());
 
         $configuration->setCustomCssClass('my-class');
         $this->assertSame('my-class', $configuration->getCustomCssClass());
-
-        $configuration->setHeaderBgColor('#ff0000');
-        $this->assertSame('#ff0000', $configuration->getHeaderBgColor());
-
-        $configuration->setHeaderTextColor('light');
-        $this->assertSame('light', $configuration->getHeaderTextColor());
-
-        $configuration->setCustomTemplate('articles/special.html.twig');
-        $this->assertSame('articles/special.html.twig', $configuration->getCustomTemplate());
-
-        $configuration->setCacheLifetime(3600);
-        $this->assertSame(3600, $configuration->getCacheLifetime());
-
-        $configuration->setCustomData('{"key": "value"}');
-        $this->assertSame('{"key": "value"}', $configuration->getCustomData());
     }
 
     public function testFluentInterface(): void

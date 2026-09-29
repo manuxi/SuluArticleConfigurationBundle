@@ -8,52 +8,46 @@ sulu_article_configuration:
     sidebar_options: "Sidebar"
     layout_style:
         title: "Layout Style"
-        default: "Default"
-        wide: "Wide"
+        info: "Width of the article content column. Default: full width."
+        default: "Default (68rem)"
+        wide: "Wide (84rem)"
         fullwidth: "Full Width"
-        narrow: "Narrow (Reading Mode)"
+        narrow: "Narrow (46rem, reading mode)"
+    show_toc:
+        title: "Table of Contents"
+        info: "Shows an automatically generated table of contents in the sidebar."
+    show_reading_time:
+        title: "Reading Time"
+        info: "Shows the estimated reading time in the article header."
+    show_author_box:
+        title: "Author Box"
+        info: "Shows author info and short bio at the end of the article."
+    show_related:
+        title: "Related Articles"
+        info: "Shows a list of related articles at the end of the article."
     enable_sidebar:
         title: "Enable Sidebar"
         info: "Shows sidebar with TOC/Related Content"
     sidebar_position:
         title: "Sidebar Position"
+        info: "Default: Right."
         left: "Left"
         right: "Right"
-    show_toc: "Table of Contents"
-    show_reading_time: "Reading Time"
-    show_author_box: "Author Box"
-    show_related: "Related Articles"
     features: "Features"
-    enable_comments: "Comments"
-    enable_share_buttons: "Share Buttons"
-    enable_print: "Print Button"
-    enable_download_pdf: "PDF Download"
+    enable_share_buttons:
+        title: "Share Buttons"
+        info: "Shows buttons to share the article (email, LinkedIn, copy link)."
+    enable_print:
+        title: "Print Button"
+        info: "Shows a button to print the article."
+    enable_download_pdf:
+        title: "PDF Download"
+        info: "Shows a button to download the article as a PDF."
     publication_settings: "Publication"
-    is_featured:
-        title: "Featured"
-        info: "Article is prioritized in featured lists."
-    is_sticky:
-        title: "Sticky"
-        info: "Article stays at the top of lists."
-    hide_from_lists:
-        title: "Hide from Lists"
-        info: "Article is accessible but does not appear in overviews."
-    hide_publish_date: "Hide Date"
+    hide_publish_date:
+        title: "Hide Date"
+        info: "Hides the publication date in the article header."
     styling: "Design"
     custom_css_class:
         title: "CSS Class"
         info: "Custom CSS class for the article container."
-    header_bg_color: "Header Background"
-    header_text_color:
-        title: "Header Text"
-        auto: "Auto"
-        light: "Light"
-        dark: "Dark"
-    advanced: "Advanced"
-    custom_template:
-        title: "Template"
-        info: "Path to Twig template (e.g. articles/special.html.twig)."
-    cache_lifetime: "Cache (seconds)"
-    custom_data:
-        title: "Custom Data (JSON)"
-        info: "Additional data as JSON object."

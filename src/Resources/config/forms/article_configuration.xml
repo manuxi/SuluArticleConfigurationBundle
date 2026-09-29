@@ -31,9 +31,10 @@
                 <property name="layoutStyle" type="single_select" colspan="6">
                     <meta>
                         <title>sulu_article_configuration.layout_style.title</title>
+                        <info_text>sulu_article_configuration.layout_style.info</info_text>
                     </meta>
                     <params>
-                        <param name="default_value" value="default"/>
+                        <param name="default_value" value="fullwidth"/>
                         <param name="values" type="collection">
                             <param name="default">
                                 <meta>
@@ -60,7 +61,8 @@
                 </property>
                 <property name="showToc" type="checkbox" colspan="3">
                     <meta>
-                        <title>sulu_article_configuration.show_toc</title>
+                        <title>sulu_article_configuration.show_toc.title</title>
+                        <info_text>sulu_article_configuration.show_toc.info</info_text>
                     </meta>
                     <params>
                         <param name="type" value="toggler"/>
@@ -69,7 +71,8 @@
                 </property>
                 <property name="showReadingTime" type="checkbox" colspan="3">
                     <meta>
-                        <title>sulu_article_configuration.show_reading_time</title>
+                        <title>sulu_article_configuration.show_reading_time.title</title>
+                        <info_text>sulu_article_configuration.show_reading_time.info</info_text>
                     </meta>
                     <params>
                         <param name="type" value="toggler"/>
@@ -78,7 +81,8 @@
                 </property>
                 <property name="showAuthorBox" type="checkbox" colspan="3">
                     <meta>
-                        <title>sulu_article_configuration.show_author_box</title>
+                        <title>sulu_article_configuration.show_author_box.title</title>
+                        <info_text>sulu_article_configuration.show_author_box.info</info_text>
                     </meta>
                     <params>
                         <param name="type" value="toggler"/>
@@ -87,7 +91,8 @@
                 </property>
                 <property name="showRelated" type="checkbox" colspan="3">
                     <meta>
-                        <title>sulu_article_configuration.show_related</title>
+                        <title>sulu_article_configuration.show_related.title</title>
+                        <info_text>sulu_article_configuration.show_related.info</info_text>
                     </meta>
                     <params>
                         <param name="type" value="toggler"/>
@@ -116,6 +121,7 @@
                           visibleCondition="enableSidebar == true">
                     <meta>
                         <title>sulu_article_configuration.sidebar_position.title</title>
+                        <info_text>sulu_article_configuration.sidebar_position.info</info_text>
                     </meta>
                     <params>
                         <param name="default_value" value="right"/>
@@ -141,36 +147,30 @@
                 <title>sulu_article_configuration.features</title>
             </meta>
             <properties>
-                <property name="enableComments" type="checkbox" colspan="3">
+                <property name="enableShareButtons" type="checkbox" colspan="4">
                     <meta>
-                        <title>sulu_article_configuration.enable_comments</title>
-                    </meta>
-                    <params>
-                        <param name="type" value="toggler"/>
-                        <param name="default_value" value="false"/>
-                    </params>
-                </property>
-                <property name="enableShareButtons" type="checkbox" colspan="3">
-                    <meta>
-                        <title>sulu_article_configuration.enable_share_buttons</title>
+                        <title>sulu_article_configuration.enable_share_buttons.title</title>
+                        <info_text>sulu_article_configuration.enable_share_buttons.info</info_text>
                     </meta>
                     <params>
                         <param name="type" value="toggler"/>
                         <param name="default_value" value="true"/>
                     </params>
                 </property>
-                <property name="enablePrint" type="checkbox" colspan="3">
+                <property name="enablePrint" type="checkbox" colspan="4">
                     <meta>
-                        <title>sulu_article_configuration.enable_print</title>
+                        <title>sulu_article_configuration.enable_print.title</title>
+                        <info_text>sulu_article_configuration.enable_print.info</info_text>
                     </meta>
                     <params>
                         <param name="type" value="toggler"/>
                         <param name="default_value" value="true"/>
                     </params>
                 </property>
-                <property name="enableDownloadPdf" type="checkbox" colspan="3">
+                <property name="enableDownloadPdf" type="checkbox" colspan="4">
                     <meta>
-                        <title>sulu_article_configuration.enable_download_pdf</title>
+                        <title>sulu_article_configuration.enable_download_pdf.title</title>
+                        <info_text>sulu_article_configuration.enable_download_pdf.info</info_text>
                     </meta>
                     <params>
                         <param name="type" value="toggler"/>
@@ -185,39 +185,10 @@
                 <title>sulu_article_configuration.publication_settings</title>
             </meta>
             <properties>
-                <property name="isFeatured" type="checkbox" colspan="3">
+                <property name="hidePublishDate" type="checkbox" colspan="6">
                     <meta>
-                        <title>sulu_article_configuration.is_featured.title</title>
-                        <info_text>sulu_article_configuration.is_featured.info</info_text>
-                    </meta>
-                    <params>
-                        <param name="type" value="toggler"/>
-                        <param name="default_value" value="false"/>
-                    </params>
-                </property>
-                <property name="isSticky" type="checkbox" colspan="3">
-                    <meta>
-                        <title>sulu_article_configuration.is_sticky.title</title>
-                        <info_text>sulu_article_configuration.is_sticky.info</info_text>
-                    </meta>
-                    <params>
-                        <param name="type" value="toggler"/>
-                        <param name="default_value" value="false"/>
-                    </params>
-                </property>
-                <property name="hideFromLists" type="checkbox" colspan="3">
-                    <meta>
-                        <title>sulu_article_configuration.hide_from_lists.title</title>
-                        <info_text>sulu_article_configuration.hide_from_lists.info</info_text>
-                    </meta>
-                    <params>
-                        <param name="type" value="toggler"/>
-                        <param name="default_value" value="false"/>
-                    </params>
-                </property>
-                <property name="hidePublishDate" type="checkbox" colspan="3">
-                    <meta>
-                        <title>sulu_article_configuration.hide_publish_date</title>
+                        <title>sulu_article_configuration.hide_publish_date.title</title>
+                        <info_text>sulu_article_configuration.hide_publish_date.info</info_text>
                     </meta>
                     <params>
                         <param name="type" value="toggler"/>
@@ -236,65 +207,6 @@
                     <meta>
                         <title>sulu_article_configuration.custom_css_class.title</title>
                         <info_text>sulu_article_configuration.custom_css_class.info</info_text>
-                    </meta>
-                </property>
-                <property name="headerBgColor" type="color" colspan="3">
-                    <meta>
-                        <title>sulu_article_configuration.header_bg_color</title>
-                    </meta>
-                </property>
-                <property name="headerTextColor" type="single_select" colspan="3">
-                    <meta>
-                        <title>sulu_article_configuration.header_text_color.title</title>
-                    </meta>
-                    <params>
-                        <param name="default_value" value="auto"/>
-                        <param name="values" type="collection">
-                            <param name="auto">
-                                <meta>
-                                    <title>sulu_article_configuration.header_text_color.auto</title>
-                                </meta>
-                            </param>
-                            <param name="light">
-                                <meta>
-                                    <title>sulu_article_configuration.header_text_color.light</title>
-                                </meta>
-                            </param>
-                            <param name="dark">
-                                <meta>
-                                    <title>sulu_article_configuration.header_text_color.dark</title>
-                                </meta>
-                            </param>
-                        </param>
-                    </params>
-                </property>
-            </properties>
-        </section>
-
-        <section name="advanced">
-            <meta>
-                <title>sulu_article_configuration.advanced</title>
-            </meta>
-            <properties>
-                <property name="customTemplate" type="text_line" colspan="6">
-                    <meta>
-                        <title>sulu_article_configuration.custom_template.title</title>
-                        <info_text>sulu_article_configuration.custom_template.info</info_text>
-                    </meta>
-                </property>
-                <property name="cacheLifetime" type="number" colspan="6">
-                    <meta>
-                        <title>sulu_article_configuration.cache_lifetime</title>
-                    </meta>
-                    <params>
-                        <param name="min" value="0"/>
-                        <param name="default_value" value="86400"/>
-                    </params>
-                </property>
-                <property name="customData" type="text_area" colspan="12">
-                    <meta>
-                        <title>sulu_article_configuration.custom_data.title</title>
-                        <info_text>sulu_article_configuration.custom_data.info</info_text>
                     </meta>
                 </property>
             </properties>

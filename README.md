@@ -20,17 +20,14 @@ It allows managing additional display options, features, and publication setting
 - **Show Elements** - Table of Contents (TOC), Reading Time, Author Box, Related Articles
 
 ### ⚙️ Functions & Features
-- **Interactions** - Comments, Share Buttons
+- **Interactions** - Share Buttons
 - **Tools** - Print Function, PDF Download
 
 ### 🚀 Publication Settings
-- **Highlighting** - "Featured" (for sliders/teasers)
-- **List Behavior** - "Sticky" (fixed at top) or "Hide from Lists" (accessible via direct link only)
 - **Metadata** - Hide Publish Date
 
 ### 🎨 Styling & Advanced
-- **Design** - Header background and text color, Custom CSS classes
-- **Technical** - Custom Template assignment, Cache Lifetime, Custom JSON Data
+- **Design** - Custom CSS classes
 
 ### 🔄 Default-Configuration
 - **Inheritance System** - Set a configuration as default for all articles of the same template key
@@ -170,27 +167,18 @@ The bundle provides a Twig function to access the resolved configuration in your
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `layoutStyle` | string | `'default'` | `default`, `wide`, `fullwidth`, `narrow` |
+| `layoutStyle` | string | `'fullwidth'` | `default`, `wide`, `fullwidth`, `narrow` |
 | `enableSidebar` | bool | `true` | Show sidebar |
 | `sidebarPosition` | string | `'right'` | `left`, `right` |
 | `showToc` | bool | `true` | Show table of contents |
 | `showReadingTime` | bool | `true` | Show reading time |
 | `showAuthorBox` | bool | `true` | Show author box |
 | `showRelated` | bool | `true` | Show related articles |
-| `enableComments` | bool | `false` | Enable comments |
 | `enableShareButtons` | bool | `true` | Show share buttons |
 | `enablePrint` | bool | `true` | Show print button |
 | `enableDownloadPdf` | bool | `false` | Show PDF download |
-| `isFeatured` | bool | `false` | Featured article |
-| `isSticky` | bool | `false` | Sticky in lists |
-| `hideFromLists` | bool | `false` | Hide from lists |
 | `hidePublishDate` | bool | `false` | Hide publish date |
 | `customCssClass` | string | `null` | Custom CSS class |
-| `headerBgColor` | string | `null` | Header background color |
-| `headerTextColor` | string | `'auto'` | `auto`, `light`, `dark` |
-| `customTemplate` | string | `null` | Custom template path |
-| `cacheLifetime` | int | `86400` | Cache lifetime in seconds |
-| `customData` | string | `null` | Custom JSON data |
 | `configSource` | string | - | `article`, `template_default`, `hardcoded` |
 
 **Example: Conditional sidebar layout**
@@ -213,16 +201,12 @@ The bundle provides a Twig function to access the resolved configuration in your
 </div>
 ```
 
-**Example: Custom header styling**
+**Example: Custom CSS class**
 
 ```twig
-{% set config = article_configuration(article.id, article.templateKey) %}
+{% set articleConfig = article_configuration(article.id, article.templateKey) %}
 
-<header class="article-header" 
-    {% if articleConfig.headerBgColor %}
-        style="background-color: {{ articleConfig.headerBgColor }}; 
-               color: {% if articleConfig.headerTextColor == 'light' %}#fff{% elseif articleConfig.headerTextColor == 'dark' %}#000{% else %}inherit{% endif %};"
-    {% endif %}>
+<header class="article-header{% if articleConfig.customCssClass %} {{ articleConfig.customCssClass }}{% endif %}">
     <h1>{{ article.title }}</h1>
 </header>
 ```

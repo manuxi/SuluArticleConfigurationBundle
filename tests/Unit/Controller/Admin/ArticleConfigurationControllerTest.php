@@ -278,10 +278,9 @@ class ArticleConfigurationControllerTest extends TestCase
                     'id', 'articleId', 'templateKey', 'default',
                     'layoutStyle', 'showToc', 'showReadingTime',
                     'showAuthorBox', 'showRelated', 'enableSidebar', 'sidebarPosition',
-                    'enableComments', 'enableShareButtons', 'enablePrint', 'enableDownloadPdf',
-                    'isFeatured', 'isSticky', 'hideFromLists', 'hidePublishDate',
-                    'customCssClass', 'headerBgColor', 'headerTextColor',
-                    'customTemplate', 'cacheLifetime', 'customData',
+                    'enableShareButtons', 'enablePrint', 'enableDownloadPdf',
+                    'hidePublishDate',
+                    'customCssClass',
                 ];
 
                 foreach ($expectedFields as $field) {
