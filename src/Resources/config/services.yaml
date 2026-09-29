@@ -15,9 +15,17 @@ services:
         arguments:
             - '@Manuxi\SuluArticleConfigurationBundle\Repository\ArticleConfigurationRepository'
 
+    Manuxi\SuluArticleConfigurationBundle\Service\ArticleTemplateResolver:
+        public: true
+        arguments:
+            - '@Sulu\Route\Domain\Repository\RouteRepositoryInterface'
+            - '@sulu_article.article_repository'
+            - '@Sulu\Content\Application\ContentManager\ContentManagerInterface'
+
     Manuxi\SuluArticleConfigurationBundle\Twig\ArticleConfigurationExtension:
         arguments:
             - '@Manuxi\SuluArticleConfigurationBundle\Service\ArticleConfigurationResolver'
+            - '@Manuxi\SuluArticleConfigurationBundle\Service\ArticleTemplateResolver'
         tags:
             - { name: 'twig.extension' }
 

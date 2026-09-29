@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Manuxi\SuluArticleConfigurationBundle\Twig;
 
 use Manuxi\SuluArticleConfigurationBundle\Service\ArticleConfigurationResolver;
+use Manuxi\SuluArticleConfigurationBundle\Service\ArticleTemplateResolver;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
@@ -12,6 +13,7 @@ class ArticleConfigurationExtension extends AbstractExtension
 {
     public function __construct(
         private ArticleConfigurationResolver $resolver,
+        private ArticleTemplateResolver $templateResolver,
     ) {
     }
 
@@ -20,6 +22,7 @@ class ArticleConfigurationExtension extends AbstractExtension
         return [
             new TwigFunction('article_configuration', [$this, 'getConfiguration']),
             new TwigFunction('article_config', [$this, 'getConfiguration']),
+            new TwigFunction('article_template_key', [$this, 'getTemplateKey']),
         ];
     }
 
@@ -44,5 +47,18 @@ class ArticleConfigurationExtension extends AbstractExtension
     public function getConfiguration(string $articleId, ?string $templateKey = null): array
     {
         return $this->resolver->resolve($articleId, $templateKey);
+    }
+
+    /**
+     * Resolve the template key of an article that is only known by its frontend URL, e.g. an item coming from a
+     * smart_content/selection list of a different content type (page, event, ...). Returns null if the URL does
+     * not resolve to a live article.
+     *
+     * Usage:
+     *   {% set templateKey = article_template_key(item.url, app.request.locale) %}
+     */
+    public function getTemplateKey(string $url, string $locale): ?string
+    {
+        return $this->templateResolver->resolveTemplateKey($url, $locale);
     }
 }

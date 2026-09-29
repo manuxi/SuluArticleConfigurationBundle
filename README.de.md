@@ -227,6 +227,29 @@ Das Bundle stellt eine Twig-Funktion bereit, um die Konfiguration in Twig-Templa
 </header>
 ```
 
+### Template eines Artikels per URL auflösen
+
+`article_configuration`/`article_config` brauchen den eigenen `templateKey` des Artikels, der beim Rendern der
+eigenen Artikelseite trivial verfügbar ist. Über die `properties`-Zuordnung eines `smart_content`-/Auswahl-Feldes
+lässt er sich aber nicht erreichen (das Feld liegt in den internen "view"-Daten der Ressource, die
+`recursivelyMapProperties()` nie mitmappt) – z. B. ein "Artikel"-Sammelfeld auf einer Seite oder einem anderen
+Artikel, wo jedes Element nur Titel/Untertitel/URL/Bild liefert, würde ihn immer vermissen.
+
+`article_template_key(url, locale)` löst ihn stattdessen über die URL des Artikels auf (über die Routen-Tabelle)
+– funktioniert also genau in dieser Situation. Gibt `null` zurück, wenn die URL zu keinem veröffentlichten Artikel
+führt.
+
+```twig
+{% set templateKey = article_template_key(item.url, app.request.locale) %}
+{% if templateKey %}
+    <span class="badge">{{ templateKey }}</span>
+{% endif %}
+```
+
+Mit einer eigenen Template-zu-Farbe/-Bezeichnung-Zuordnung kombinieren (z. B. eine projektweite Farbpalette), um
+Artikel in einer Liste nach ihrem Template zu kennzeichnen – das Bundle löst nur den Schlüssel auf, hat aber
+keine Meinung zu Farben oder Bezeichnungen.
+
 ## 🗄️ Datenbank-Schema
 
 Das Bundle erstellt folgende Tabelle:

@@ -227,6 +227,27 @@ The bundle provides a Twig function to access the resolved configuration in your
 </header>
 ```
 
+### Resolving an Article's Template by URL
+
+`article_configuration`/`article_config` need the article's own `templateKey`, which is trivial to pass when you
+are already rendering that article's own page. It is not reachable through Sulu's `properties` mapping on a
+`smart_content`/selection list, though (the field lives in the resource's internal "view" data, which
+`recursivelyMapProperties()` never maps) -- for example an "articles" collection field on a page or a different
+article, where each item is only a title/subtitle/url/image, would always miss it.
+
+`article_template_key(url, locale)` resolves it from the article's frontend URL instead (via the route table),
+so it works from exactly that situation. Returns `null` if the URL does not resolve to a live article.
+
+```twig
+{% set templateKey = article_template_key(item.url, app.request.locale) %}
+{% if templateKey %}
+    <span class="badge">{{ templateKey }}</span>
+{% endif %}
+```
+
+Combine with your own template-to-color/label mapping (e.g. a project-level color palette) to badge articles
+by their template in a list -- the bundle only resolves the key, it has no opinion on colors or labels.
+
 ## 🗄️ Database Schema
 
 The bundle creates the following table:
