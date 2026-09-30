@@ -22,6 +22,7 @@ It allows managing additional display options, features, and publication setting
 ### ⚙️ Functions & Features
 - **Interactions** - Share Buttons
 - **Tools** - Print Function, PDF Download
+- **PDF Options** - Image captions, author box, last-modified date, link/QR code to the online version and company data (none / footer / end) - the bundle only stores these switches, your project renders the PDF
 
 ### 🚀 Publication Settings
 - **Metadata** - Hide Publish Date
@@ -177,6 +178,11 @@ The bundle provides a Twig function to access the resolved configuration in your
 | `enableShareButtons` | bool | `true` | Show share buttons |
 | `enablePrint` | bool | `true` | Show print button |
 | `enableDownloadPdf` | bool | `false` | Show PDF download |
+| `pdfShowCaptions` | bool | `true` | PDF: show image captions |
+| `pdfShowAuthor` | bool | `true` | PDF: show author box |
+| `pdfShowModified` | bool | `true` | PDF: show last-modified date |
+| `pdfShowOnlineLink` | bool | `true` | PDF: show QR code and link to the online version |
+| `pdfCompanyData` | string | `'none'` | PDF: company data - `none`, `footer`, `end` |
 | `hidePublishDate` | bool | `false` | Hide publish date |
 | `customCssClass` | string | `null` | Custom CSS class |
 | `configSource` | string | - | `article`, `template_default`, `hardcoded` |

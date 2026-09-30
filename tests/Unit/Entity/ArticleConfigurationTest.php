@@ -27,6 +27,11 @@ class ArticleConfigurationTest extends TestCase
         $this->assertTrue($configuration->isEnableShareButtons());
         $this->assertTrue($configuration->isEnablePrint());
         $this->assertFalse($configuration->isEnableDownloadPdf());
+        $this->assertTrue($configuration->isPdfShowCaptions());
+        $this->assertTrue($configuration->isPdfShowAuthor());
+        $this->assertTrue($configuration->isPdfShowModified());
+        $this->assertTrue($configuration->isPdfShowOnlineLink());
+        $this->assertSame('none', $configuration->getPdfCompanyData());
         $this->assertFalse($configuration->isHidePublishDate());
         $this->assertNull($configuration->getCustomCssClass());
     }
@@ -73,6 +78,21 @@ class ArticleConfigurationTest extends TestCase
 
         $configuration->setEnableDownloadPdf(true);
         $this->assertTrue($configuration->isEnableDownloadPdf());
+
+        $configuration->setPdfShowCaptions(false);
+        $this->assertFalse($configuration->isPdfShowCaptions());
+
+        $configuration->setPdfShowAuthor(false);
+        $this->assertFalse($configuration->isPdfShowAuthor());
+
+        $configuration->setPdfShowModified(false);
+        $this->assertFalse($configuration->isPdfShowModified());
+
+        $configuration->setPdfShowOnlineLink(false);
+        $this->assertFalse($configuration->isPdfShowOnlineLink());
+
+        $configuration->setPdfCompanyData('footer');
+        $this->assertSame('footer', $configuration->getPdfCompanyData());
 
         $configuration->setHidePublishDate(true);
         $this->assertTrue($configuration->isHidePublishDate());

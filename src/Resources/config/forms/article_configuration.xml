@@ -180,6 +180,80 @@
             </properties>
         </section>
 
+        <section name="pdf_options">
+            <meta>
+                <title>sulu_article_configuration.pdf_options</title>
+            </meta>
+            <properties>
+                <property name="pdfShowCaptions" type="checkbox" colspan="6" visibleCondition="enableDownloadPdf == true">
+                    <meta>
+                        <title>sulu_article_configuration.pdf_show_captions.title</title>
+                        <info_text>sulu_article_configuration.pdf_show_captions.info</info_text>
+                    </meta>
+                    <params>
+                        <param name="type" value="toggler"/>
+                        <param name="default_value" value="true"/>
+                    </params>
+                </property>
+                <property name="pdfShowAuthor" type="checkbox" colspan="6" visibleCondition="enableDownloadPdf == true">
+                    <meta>
+                        <title>sulu_article_configuration.pdf_show_author.title</title>
+                        <info_text>sulu_article_configuration.pdf_show_author.info</info_text>
+                    </meta>
+                    <params>
+                        <param name="type" value="toggler"/>
+                        <param name="default_value" value="true"/>
+                    </params>
+                </property>
+                <property name="pdfShowModified" type="checkbox" colspan="6" visibleCondition="enableDownloadPdf == true">
+                    <meta>
+                        <title>sulu_article_configuration.pdf_show_modified.title</title>
+                        <info_text>sulu_article_configuration.pdf_show_modified.info</info_text>
+                    </meta>
+                    <params>
+                        <param name="type" value="toggler"/>
+                        <param name="default_value" value="true"/>
+                    </params>
+                </property>
+                <property name="pdfShowOnlineLink" type="checkbox" colspan="6" visibleCondition="enableDownloadPdf == true">
+                    <meta>
+                        <title>sulu_article_configuration.pdf_show_online_link.title</title>
+                        <info_text>sulu_article_configuration.pdf_show_online_link.info</info_text>
+                    </meta>
+                    <params>
+                        <param name="type" value="toggler"/>
+                        <param name="default_value" value="true"/>
+                    </params>
+                </property>
+                <property name="pdfCompanyData" type="single_select" colspan="6" visibleCondition="enableDownloadPdf == true">
+                    <meta>
+                        <title>sulu_article_configuration.pdf_company_data.title</title>
+                        <info_text>sulu_article_configuration.pdf_company_data.info</info_text>
+                    </meta>
+                    <params>
+                        <param name="default_value" value="none"/>
+                        <param name="values" type="collection">
+                            <param name="none">
+                                <meta>
+                                    <title>sulu_article_configuration.pdf_company_data.none</title>
+                                </meta>
+                            </param>
+                            <param name="footer">
+                                <meta>
+                                    <title>sulu_article_configuration.pdf_company_data.footer</title>
+                                </meta>
+                            </param>
+                            <param name="end">
+                                <meta>
+                                    <title>sulu_article_configuration.pdf_company_data.end</title>
+                                </meta>
+                            </param>
+                        </param>
+                    </params>
+                </property>
+            </properties>
+        </section>
+
         <section name="publication_settings">
             <meta>
                 <title>sulu_article_configuration.publication_settings</title>

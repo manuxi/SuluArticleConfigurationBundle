@@ -43,6 +43,25 @@ sulu_article_configuration:
     enable_download_pdf:
         title: "PDF-Download"
         info: "Zeigt einen Button zum Herunterladen des Artikels als PDF."
+    pdf_options: "PDF"
+    pdf_show_captions:
+        title: "Bildunterschriften"
+        info: "Zeigt die Bildunterschriften im PDF."
+    pdf_show_author:
+        title: "Autorenkasten"
+        info: "Zeigt den Kasten mit Autor und Kurzvita am Ende."
+    pdf_show_modified:
+        title: "Zuletzt geändert"
+        info: "Zeigt das Datum der letzten Änderung am Ende."
+    pdf_show_online_link:
+        title: "Link zur Online-Version"
+        info: "Zeigt QR-Code und Link zum Artikel am Ende."
+    pdf_company_data:
+        title: "Firmendaten"
+        info: "Fügt die Firmendaten der Organisation ein."
+        none: "Nicht anzeigen"
+        footer: "Auf jeder Seite (Fußzeile)"
+        end: "Am Ende des PDFs"
     publication_settings: "Veröffentlichung"
     hide_publish_date:
         title: "Datum verbergen"

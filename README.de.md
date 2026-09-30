@@ -22,6 +22,7 @@ Es ermöglicht die Verwaltung zusätzlicher Darstellungsoptionen, Features und V
 ### ⚙️ Funktionen & Features
 - **Interaktionen** - Share-Buttons
 - **Tools** - Druck-Funktion, PDF-Download
+- **PDF-Optionen** - Bildunterschriften, Autorenkasten, Datum der letzten Änderung, Link/QR-Code zur Online-Version und Firmendaten (keine / Fußzeile / Ende) - das Bundle speichert nur diese Schalter, das PDF erzeugt Ihr Projekt
 
 ### 🚀 Veröffentlichungs-Einstellungen
 - **Metadaten** - Veröffentlichungsdatum ausblenden
@@ -177,6 +178,11 @@ Das Bundle stellt eine Twig-Funktion bereit, um die Konfiguration in Twig-Templa
 | `enableShareButtons` | bool | `true` | Teilen-Buttons anzeigen |
 | `enablePrint` | bool | `true` | Drucken-Button anzeigen |
 | `enableDownloadPdf` | bool | `false` | PDF-Download anzeigen |
+| `pdfShowCaptions` | bool | `true` | PDF: Bildunterschriften anzeigen |
+| `pdfShowAuthor` | bool | `true` | PDF: Autorenkasten anzeigen |
+| `pdfShowModified` | bool | `true` | PDF: Datum der letzten Änderung anzeigen |
+| `pdfShowOnlineLink` | bool | `true` | PDF: QR-Code und Link zur Online-Version anzeigen |
+| `pdfCompanyData` | string | `'none'` | PDF: Firmendaten - `none`, `footer`, `end` |
 | `hidePublishDate` | bool | `false` | Veröffentlichungsdatum verbergen |
 | `customCssClass` | string | `null` | Eigene CSS-Klasse |
 | `configSource` | string | - | `article`, `template_default`, `hardcoded` |

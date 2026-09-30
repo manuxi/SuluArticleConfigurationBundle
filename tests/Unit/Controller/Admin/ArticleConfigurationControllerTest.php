@@ -279,6 +279,7 @@ class ArticleConfigurationControllerTest extends TestCase
                     'layoutStyle', 'showToc', 'showReadingTime',
                     'showAuthorBox', 'showRelated', 'enableSidebar', 'sidebarPosition',
                     'enableShareButtons', 'enablePrint', 'enableDownloadPdf',
+                    'pdfShowCaptions', 'pdfShowAuthor', 'pdfShowModified', 'pdfShowOnlineLink', 'pdfCompanyData',
                     'hidePublishDate',
                     'customCssClass',
                 ];
