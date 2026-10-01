@@ -21,8 +21,7 @@ Es ermöglicht die Verwaltung zusätzlicher Darstellungsoptionen, Features und V
 
 ### ⚙️ Funktionen & Features
 - **Interaktionen** - Share-Buttons
-- **Tools** - Druck-Funktion, PDF-Download
-- **PDF-Optionen** - Bildunterschriften, Autorenkasten, Datum der letzten Änderung, Link/QR-Code zur Online-Version und Firmendaten (keine / Fußzeile / Ende) - das Bundle speichert nur diese Schalter, das PDF erzeugt Ihr Projekt
+- **Tools** - Druck-Funktion
 
 ### 🚀 Veröffentlichungs-Einstellungen
 - **Metadaten** - Veröffentlichungsdatum ausblenden
@@ -177,12 +176,6 @@ Das Bundle stellt eine Twig-Funktion bereit, um die Konfiguration in Twig-Templa
 | `showRelated` | bool | `true` | Ähnliche Artikel anzeigen |
 | `enableShareButtons` | bool | `true` | Teilen-Buttons anzeigen |
 | `enablePrint` | bool | `true` | Drucken-Button anzeigen |
-| `enableDownloadPdf` | bool | `false` | PDF-Download anzeigen |
-| `pdfShowCaptions` | bool | `true` | PDF: Bildunterschriften anzeigen |
-| `pdfShowAuthor` | bool | `true` | PDF: Autorenkasten anzeigen |
-| `pdfShowModified` | bool | `true` | PDF: Datum der letzten Änderung anzeigen |
-| `pdfShowOnlineLink` | bool | `true` | PDF: QR-Code und Link zur Online-Version anzeigen |
-| `pdfCompanyData` | string | `'none'` | PDF: Firmendaten - `none`, `footer`, `end` |
 | `hidePublishDate` | bool | `false` | Veröffentlichungsdatum verbergen |
 | `customCssClass` | string | `null` | Eigene CSS-Klasse |
 | `configSource` | string | - | `article`, `template_default`, `hardcoded` |
@@ -240,6 +233,18 @@ Mit einer eigenen Template-zu-Farbe/-Bezeichnung-Zuordnung kombinieren (z. B. ei
 Artikel in einer Liste nach ihrem Template zu kennzeichnen – das Bundle löst nur den Schlüssel auf, hat aber
 keine Meinung zu Farben oder Bezeichnungen.
 
+## ⬆️ Umstieg von 1.x
+
+2.0 entfernt die PDF-Schalter (`enableDownloadPdf`, `pdfShowCaptions`, `pdfShowAuthor`, `pdfShowModified`, `pdfShowOnlineLink`, `pdfCompanyData`) aus dem Tab "Konfiguration". Sie liegen jetzt im **Reiter "Auszug"** des Artikels, geliefert von [manuxi/sulu-pdf-bundle](https://github.com/manuxi/SuluPdfBundle) (1.3+) - pro Sprache und mit Entwurf/Veröffentlichen:
+
+```yaml
+sulu_pdf:
+    excerpt:
+        articles: true
+```
+
+Ersetzen Sie `articleConfig.enableDownloadPdf` in Ihren Templates durch `sulu_pdf_available('articles', uuid, app.request.locale)`, führen Sie `bin/adminconsole doctrine:schema:update --force` aus, um die Spalten zu entfernen, und setzen Sie die Schalter im Reiter "Auszug" neu.
+
 ## 🗄️ Datenbank-Schema
 
 Das Bundle erstellt folgende Tabelle:
@@ -257,20 +262,10 @@ CREATE TABLE ar_article_configuration (
     show_reading_time TINYINT(1) DEFAULT 1 NOT NULL,
     show_author_box TINYINT(1) DEFAULT 1 NOT NULL,
     show_related TINYINT(1) DEFAULT 1 NOT NULL,
-    enable_comments TINYINT(1) DEFAULT 0 NOT NULL,
     enable_share_buttons TINYINT(1) DEFAULT 1 NOT NULL,
     enable_print TINYINT(1) DEFAULT 1 NOT NULL,
-    enable_download_pdf TINYINT(1) DEFAULT 0 NOT NULL,
-    is_featured TINYINT(1) DEFAULT 0 NOT NULL,
-    is_sticky TINYINT(1) DEFAULT 0 NOT NULL,
-    hide_from_lists TINYINT(1) DEFAULT 0 NOT NULL,
     hide_publish_date TINYINT(1) DEFAULT 0 NOT NULL,
     custom_css_class VARCHAR(128) DEFAULT NULL,
-    header_bg_color VARCHAR(32) DEFAULT NULL,
-    header_text_color VARCHAR(16) DEFAULT 'auto' NOT NULL,
-    custom_template VARCHAR(255) DEFAULT NULL,
-    cache_lifetime INT DEFAULT 86400 NOT NULL,
-    custom_data LONGTEXT DEFAULT NULL,
     INDEX idx_template_default (template_key, is_default)
 );
 ```

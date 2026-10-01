@@ -21,8 +21,7 @@ It allows managing additional display options, features, and publication setting
 
 ### ⚙️ Functions & Features
 - **Interactions** - Share Buttons
-- **Tools** - Print Function, PDF Download
-- **PDF Options** - Image captions, author box, last-modified date, link/QR code to the online version and company data (none / footer / end) - the bundle only stores these switches, your project renders the PDF
+- **Tools** - Print Function
 
 ### 🚀 Publication Settings
 - **Metadata** - Hide Publish Date
@@ -177,12 +176,6 @@ The bundle provides a Twig function to access the resolved configuration in your
 | `showRelated` | bool | `true` | Show related articles |
 | `enableShareButtons` | bool | `true` | Show share buttons |
 | `enablePrint` | bool | `true` | Show print button |
-| `enableDownloadPdf` | bool | `false` | Show PDF download |
-| `pdfShowCaptions` | bool | `true` | PDF: show image captions |
-| `pdfShowAuthor` | bool | `true` | PDF: show author box |
-| `pdfShowModified` | bool | `true` | PDF: show last-modified date |
-| `pdfShowOnlineLink` | bool | `true` | PDF: show QR code and link to the online version |
-| `pdfCompanyData` | string | `'none'` | PDF: company data - `none`, `footer`, `end` |
 | `hidePublishDate` | bool | `false` | Hide publish date |
 | `customCssClass` | string | `null` | Custom CSS class |
 | `configSource` | string | - | `article`, `template_default`, `hardcoded` |
@@ -238,6 +231,18 @@ so it works from exactly that situation. Returns `null` if the URL does not reso
 Combine with your own template-to-color/label mapping (e.g. a project-level color palette) to badge articles
 by their template in a list -- the bundle only resolves the key, it has no opinion on colors or labels.
 
+## ⬆️ Upgrading from 1.x
+
+2.0 removes the PDF switches (`enableDownloadPdf`, `pdfShowCaptions`, `pdfShowAuthor`, `pdfShowModified`, `pdfShowOnlineLink`, `pdfCompanyData`) from the "Configuration" tab. They now live in the **excerpt tab** of the article, provided by [manuxi/sulu-pdf-bundle](https://github.com/manuxi/SuluPdfBundle) (1.3+) - per language and with the draft/publish workflow:
+
+```yaml
+sulu_pdf:
+    excerpt:
+        articles: true
+```
+
+Replace `articleConfig.enableDownloadPdf` in your templates with `sulu_pdf_available('articles', uuid, app.request.locale)`, run `bin/adminconsole doctrine:schema:update --force` to drop the columns and set the switches again in the excerpt tab.
+
 ## 🗄️ Database Schema
 
 The bundle creates the following table:
@@ -255,20 +260,10 @@ CREATE TABLE ar_article_configuration (
     show_reading_time TINYINT(1) DEFAULT 1 NOT NULL,
     show_author_box TINYINT(1) DEFAULT 1 NOT NULL,
     show_related TINYINT(1) DEFAULT 1 NOT NULL,
-    enable_comments TINYINT(1) DEFAULT 0 NOT NULL,
     enable_share_buttons TINYINT(1) DEFAULT 1 NOT NULL,
     enable_print TINYINT(1) DEFAULT 1 NOT NULL,
-    enable_download_pdf TINYINT(1) DEFAULT 0 NOT NULL,
-    is_featured TINYINT(1) DEFAULT 0 NOT NULL,
-    is_sticky TINYINT(1) DEFAULT 0 NOT NULL,
-    hide_from_lists TINYINT(1) DEFAULT 0 NOT NULL,
     hide_publish_date TINYINT(1) DEFAULT 0 NOT NULL,
     custom_css_class VARCHAR(128) DEFAULT NULL,
-    header_bg_color VARCHAR(32) DEFAULT NULL,
-    header_text_color VARCHAR(16) DEFAULT 'auto' NOT NULL,
-    custom_template VARCHAR(255) DEFAULT NULL,
-    cache_lifetime INT DEFAULT 86400 NOT NULL,
-    custom_data LONGTEXT DEFAULT NULL,
     INDEX idx_template_default (template_key, is_default)
 );
 ```

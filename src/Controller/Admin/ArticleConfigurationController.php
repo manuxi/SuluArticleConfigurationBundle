@@ -86,12 +86,6 @@ class ArticleConfigurationController extends AbstractRestController
 
         $configuration->setEnableShareButtons($data['enableShareButtons'] ?? true);
         $configuration->setEnablePrint($data['enablePrint'] ?? true);
-        $configuration->setEnableDownloadPdf($data['enableDownloadPdf'] ?? false);
-        $configuration->setPdfShowCaptions($data['pdfShowCaptions'] ?? true);
-        $configuration->setPdfShowAuthor($data['pdfShowAuthor'] ?? true);
-        $configuration->setPdfShowModified($data['pdfShowModified'] ?? true);
-        $configuration->setPdfShowOnlineLink($data['pdfShowOnlineLink'] ?? true);
-        $configuration->setPdfCompanyData($data['pdfCompanyData'] ?? 'none');
 
         $configuration->setHidePublishDate($data['hidePublishDate'] ?? false);
 
@@ -149,12 +143,6 @@ class ArticleConfigurationController extends AbstractRestController
             'sidebarPosition' => 'right',
             'enableShareButtons' => true,
             'enablePrint' => true,
-            'enableDownloadPdf' => false,
-            'pdfShowCaptions' => true,
-            'pdfShowAuthor' => true,
-            'pdfShowModified' => true,
-            'pdfShowOnlineLink' => true,
-            'pdfCompanyData' => 'none',
             'hidePublishDate' => false,
             'customCssClass' => null,
         ];
@@ -176,12 +164,6 @@ class ArticleConfigurationController extends AbstractRestController
             'sidebarPosition' => $configuration->getSidebarPosition(),
             'enableShareButtons' => $configuration->isEnableShareButtons(),
             'enablePrint' => $configuration->isEnablePrint(),
-            'enableDownloadPdf' => $configuration->isEnableDownloadPdf(),
-            'pdfShowCaptions' => $configuration->isPdfShowCaptions(),
-            'pdfShowAuthor' => $configuration->isPdfShowAuthor(),
-            'pdfShowModified' => $configuration->isPdfShowModified(),
-            'pdfShowOnlineLink' => $configuration->isPdfShowOnlineLink(),
-            'pdfCompanyData' => $configuration->getPdfCompanyData(),
             'hidePublishDate' => $configuration->isHidePublishDate(),
             'customCssClass' => $configuration->getCustomCssClass(),
         ];

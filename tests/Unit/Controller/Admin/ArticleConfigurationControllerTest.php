@@ -278,8 +278,7 @@ class ArticleConfigurationControllerTest extends TestCase
                     'id', 'articleId', 'templateKey', 'default',
                     'layoutStyle', 'showToc', 'showReadingTime',
                     'showAuthorBox', 'showRelated', 'enableSidebar', 'sidebarPosition',
-                    'enableShareButtons', 'enablePrint', 'enableDownloadPdf',
-                    'pdfShowCaptions', 'pdfShowAuthor', 'pdfShowModified', 'pdfShowOnlineLink', 'pdfCompanyData',
+                    'enableShareButtons', 'enablePrint',
                     'hidePublishDate',
                     'customCssClass',
                 ];

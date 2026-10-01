@@ -55,24 +55,6 @@ class ArticleConfiguration
     private bool $enablePrint = true;
 
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
-    private bool $enableDownloadPdf = false;
-
-    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => true])]
-    private bool $pdfShowCaptions = true;
-
-    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => true])]
-    private bool $pdfShowAuthor = true;
-
-    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => true])]
-    private bool $pdfShowModified = true;
-
-    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => true])]
-    private bool $pdfShowOnlineLink = true;
-
-    #[ORM\Column(type: Types::STRING, length: 16, options: ['default' => 'none'])]
-    private string $pdfCompanyData = 'none';
-
-    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
     private bool $hidePublishDate = false;
 
     #[ORM\Column(type: Types::STRING, length: 128, nullable: true)]
@@ -212,73 +194,6 @@ class ArticleConfiguration
     public function setEnablePrint(bool $enablePrint): self
     {
         $this->enablePrint = $enablePrint;
-        return $this;
-    }
-
-    public function isEnableDownloadPdf(): bool
-    {
-        return $this->enableDownloadPdf;
-    }
-
-    public function setEnableDownloadPdf(bool $enableDownloadPdf): self
-    {
-        $this->enableDownloadPdf = $enableDownloadPdf;
-        return $this;
-    }
-
-    public function isPdfShowCaptions(): bool
-    {
-        return $this->pdfShowCaptions;
-    }
-
-    public function setPdfShowCaptions(bool $pdfShowCaptions): self
-    {
-        $this->pdfShowCaptions = $pdfShowCaptions;
-        return $this;
-    }
-
-    public function isPdfShowAuthor(): bool
-    {
-        return $this->pdfShowAuthor;
-    }
-
-    public function setPdfShowAuthor(bool $pdfShowAuthor): self
-    {
-        $this->pdfShowAuthor = $pdfShowAuthor;
-        return $this;
-    }
-
-    public function isPdfShowModified(): bool
-    {
-        return $this->pdfShowModified;
-    }
-
-    public function setPdfShowModified(bool $pdfShowModified): self
-    {
-        $this->pdfShowModified = $pdfShowModified;
-        return $this;
-    }
-
-    public function isPdfShowOnlineLink(): bool
-    {
-        return $this->pdfShowOnlineLink;
-    }
-
-    public function setPdfShowOnlineLink(bool $pdfShowOnlineLink): self
-    {
-        $this->pdfShowOnlineLink = $pdfShowOnlineLink;
-        return $this;
-    }
-
-    /** none | footer | end */
-    public function getPdfCompanyData(): string
-    {
-        return $this->pdfCompanyData;
-    }
-
-    public function setPdfCompanyData(string $pdfCompanyData): self
-    {
-        $this->pdfCompanyData = $pdfCompanyData;
         return $this;
     }
 
