@@ -10,10 +10,32 @@ services:
         tags:
             - { name: 'doctrine.repository_service' }
 
+    Manuxi\SuluArticleConfigurationBundle\Service\ArticleGroupProvider:
+        arguments:
+            - '@sulu_admin.metadata_group_provider'
+
+    Manuxi\SuluArticleConfigurationBundle\Schema\ConfigurationSchema:
+        arguments:
+            - '%sulu_article_configuration.schema%'
+            - '@Manuxi\SuluArticleConfigurationBundle\Service\ArticleGroupProvider'
+
+    Manuxi\SuluArticleConfigurationBundle\Admin\FormMetadata\ArticleConfigurationFormMetadataLoader:
+        arguments:
+            - '@Manuxi\SuluArticleConfigurationBundle\Schema\ConfigurationSchema'
+        tags:
+            - { name: 'sulu_admin.form_metadata_loader' }
+
+    Manuxi\SuluArticleConfigurationBundle\Command\MigrateToJsonCommand:
+        arguments:
+            - '@doctrine.dbal.default_connection'
+        tags:
+            - { name: 'console.command' }
+
     Manuxi\SuluArticleConfigurationBundle\Service\ArticleConfigurationResolver:
         public: true
         arguments:
             - '@Manuxi\SuluArticleConfigurationBundle\Repository\ArticleConfigurationRepository'
+            - '@Manuxi\SuluArticleConfigurationBundle\Schema\ConfigurationSchema'
 
     Manuxi\SuluArticleConfigurationBundle\Service\ArticleTemplateResolver:
         public: true
@@ -36,6 +58,7 @@ services:
             - '@doctrine.orm.entity_manager'
             - '@sulu_article.article_repository'
             - '@Sulu\Content\Application\ContentAggregator\ContentAggregatorInterface'
+            - '@Manuxi\SuluArticleConfigurationBundle\Schema\ConfigurationSchema'
             - '@fos_rest.view_handler'
         tags:
             - { name: 'sulu.context', context: 'admin' }
@@ -43,7 +66,7 @@ services:
     Manuxi\SuluArticleConfigurationBundle\Admin\ArticleConfigurationAdmin:
         arguments:
             - '@sulu_admin.view_builder_factory'
-            - '@sulu_admin.metadata_group_provider'
+            - '@Manuxi\SuluArticleConfigurationBundle\Service\ArticleGroupProvider'
             - '@sulu_security.security_checker'
         tags:
             - { name: 'sulu.admin', priority: -10 }

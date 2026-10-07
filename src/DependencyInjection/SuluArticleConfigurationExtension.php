@@ -18,11 +18,6 @@ class SuluArticleConfigurationExtension extends Extension implements PrependExte
             $container->prependExtensionConfig(
                 'sulu_admin',
                 [
-                    'forms' => [
-                        'directories' => [
-                            __DIR__ . '/../Resources/config/forms',
-                        ],
-                    ],
                     'resources' => [
                         'article_configurations' => [
                             'routes' => [
@@ -42,6 +37,9 @@ class SuluArticleConfigurationExtension extends Extension implements PrependExte
 
     public function load(array $configs, ContainerBuilder $container): void
     {
+        $config = $this->processConfiguration(new Configuration(), $configs);
+        $container->setParameter('sulu_article_configuration.schema', $config);
+
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yaml');
     }

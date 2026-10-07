@@ -29,6 +29,10 @@ Es ermöglicht die Verwaltung zusätzlicher Darstellungsoptionen, Features und V
 ### 🎨 Styling & Erweitert
 - **Design** - Custom CSS Klassen
 
+### 🧩 Konfigurierbare Felder
+- **YAML-Schema** - Felder in der Projekt-Konfiguration hinzufügen, ändern oder entfernen, ohne Datenbank-Änderung
+- **Pro Group und pro Template** - Jedes Template kann eigene Felder haben, siehe [docs/configuration.de.md](docs/configuration.de.md)
+
 ### 🔄 Standard-Konfiguration für Templates
 - **Vererbungs-System** - Setze eine Standard-Konfiguration für alle Artikel desselben Templates
 - **3-Stufen-Kaskade** - Artikel-spezifisch → Template-spezifisch → Standardwerte
@@ -109,6 +113,23 @@ Nun verwenden alle anderen Artikel mit diesem Template automatisch diese Einstel
 3. Keines von beiden? → hinterlegte Standardwerte werden verwendet
 ```
 
+### Eigene Felder
+
+Die Felder des Tabs "Konfiguration" werden durch ein Schema festgelegt. Das Bundle liefert die unten aufgeführten
+Felder mit, dein Projekt kann sie ändern oder eigene hinzufügen - global, pro Artikel-Group oder pro Template:
+
+```yaml
+sulu_article_configuration:
+    templates:
+        blog_post:
+            fields:
+                showToc: false
+                heroVariant: { type: single_select, values: [image, video], default: image }
+```
+
+Die Werte werden als JSON gespeichert, ein neues Feld braucht also nie ein Schema-Update. Alle Optionen,
+Übersetzungen und Ebenen stehen in [docs/configuration.de.md](docs/configuration.de.md).
+
 ### Frontend-Nutzung (Twig)
 
 Das Bundle stellt eine Twig-Funktion bereit, um die Konfiguration in Twig-Templates bereit zu stellen:
@@ -163,7 +184,7 @@ Das Bundle stellt eine Twig-Funktion bereit, um die Konfiguration in Twig-Templa
 {% endif %}
 ```
 
-**Verfügbare Konfigurationswerte:**
+**Verfügbare Konfigurationswerte** (die mitgelieferten Felder; dein Schema kann Felder hinzufügen oder entfernen, `hardcoded` bedeutet die Standardwerte des Schemas):
 
 | Eigenschaft | Typ | Standard | Beschreibung |
 |-------------|-----|----------|--------------|
@@ -233,6 +254,17 @@ Mit einer eigenen Template-zu-Farbe/-Bezeichnung-Zuordnung kombinieren (z. B. ei
 Artikel in einer Liste nach ihrem Template zu kennzeichnen – das Bundle löst nur den Schlüssel auf, hat aber
 keine Meinung zu Farben oder Bezeichnungen.
 
+## ⬆️ Umstieg von 2.x
+
+3.0 speichert die Werte als JSON statt in festen Spalten. Die Daten **vor** dem Schema-Update kopieren:
+
+```bash
+php bin/console sulu:article-configuration:migrate-to-json
+php bin/console doctrine:schema:update --force
+```
+
+Details und die Liste der Breaking Changes: [docs/configuration.de.md](docs/configuration.de.md) und [CHANGELOG.md](CHANGELOG.md).
+
 ## ⬆️ Umstieg von 1.x
 
 2.0 entfernt die PDF-Schalter (`enableDownloadPdf`, `pdfShowCaptions`, `pdfShowAuthor`, `pdfShowModified`, `pdfShowOnlineLink`, `pdfCompanyData`) aus dem Tab "Konfiguration". Sie liegen jetzt im **Reiter "Auszug"** des Artikels, geliefert von [manuxi/sulu-pdf-bundle](https://github.com/manuxi/SuluPdfBundle) (1.3+) - pro Sprache und mit Entwurf/Veröffentlichen:
@@ -255,17 +287,7 @@ CREATE TABLE ar_article_configuration (
     article_id VARCHAR(36) UNIQUE NOT NULL,
     template_key VARCHAR(128) DEFAULT NULL,
     is_default TINYINT(1) DEFAULT 0 NOT NULL,
-    layout_style VARCHAR(32) DEFAULT 'default' NOT NULL,
-    enable_sidebar TINYINT(1) DEFAULT 1 NOT NULL,
-    sidebar_position VARCHAR(16) DEFAULT 'right' NOT NULL,
-    show_toc TINYINT(1) DEFAULT 1 NOT NULL,
-    show_reading_time TINYINT(1) DEFAULT 1 NOT NULL,
-    show_author_box TINYINT(1) DEFAULT 1 NOT NULL,
-    show_related TINYINT(1) DEFAULT 1 NOT NULL,
-    enable_share_buttons TINYINT(1) DEFAULT 1 NOT NULL,
-    enable_print TINYINT(1) DEFAULT 1 NOT NULL,
-    hide_publish_date TINYINT(1) DEFAULT 0 NOT NULL,
-    custom_css_class VARCHAR(128) DEFAULT NULL,
+    data JSON DEFAULT NULL,
     INDEX idx_template_default (template_key, is_default)
 );
 ```

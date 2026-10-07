@@ -6,7 +6,9 @@ namespace Manuxi\SuluArticleConfigurationBundle\Tests\Unit\Service;
 
 use Manuxi\SuluArticleConfigurationBundle\Entity\ArticleConfiguration;
 use Manuxi\SuluArticleConfigurationBundle\Repository\ArticleConfigurationRepository;
+use Manuxi\SuluArticleConfigurationBundle\Schema\ConfigurationSchema;
 use Manuxi\SuluArticleConfigurationBundle\Service\ArticleConfigurationResolver;
+use Manuxi\SuluArticleConfigurationBundle\Service\ArticleGroupProvider;
 use PHPUnit\Framework\TestCase;
 
 class ArticleConfigurationResolverTest extends TestCase
@@ -17,7 +19,12 @@ class ArticleConfigurationResolverTest extends TestCase
     protected function setUp(): void
     {
         $this->repository = $this->createMock(ArticleConfigurationRepository::class);
-        $this->resolver = new ArticleConfigurationResolver($this->repository);
+        $groupProvider = $this->createMock(ArticleGroupProvider::class);
+        $groupProvider->method('getGroupIdentifier')->willReturn('default');
+
+        $this->resolver = new ArticleConfigurationResolver($this->repository, new ConfigurationSchema([
+            'templates' => ['article_blog' => ['fields' => ['showToc' => false, 'heroVariant' => ['type' => 'single_select', 'values' => ['image', 'video']]]]],
+        ], $groupProvider));
     }
 
     public function testResolveWithArticleConfig(): void
@@ -28,7 +35,7 @@ class ArticleConfigurationResolverTest extends TestCase
         $config = new ArticleConfiguration();
         $config->setArticleId($articleId);
         $config->setTemplateKey($templateKey);
-        $config->setLayoutStyle('wide');
+        $config->setData(['layoutStyle' => 'wide']);
 
         $this->repository->expects($this->once())
             ->method('findByArticleId')
@@ -55,7 +62,7 @@ class ArticleConfigurationResolverTest extends TestCase
         $defaultConfig->setArticleId($defaultArticleId);
         $defaultConfig->setTemplateKey($templateKey);
         $defaultConfig->setDefault(true);
-        $defaultConfig->setLayoutStyle('narrow');
+        $defaultConfig->setData(['layoutStyle' => 'narrow']);
 
         $this->repository->expects($this->once())
             ->method('findByArticleId')
@@ -111,5 +118,56 @@ class ArticleConfigurationResolverTest extends TestCase
         $result = $this->resolver->resolve($articleId, null);
 
         $this->assertEquals('hardcoded', $result['configSource']);
+    }
+
+    public function testResolveFillsMissingKeysWithSchemaDefaultsAndDropsRemovedFields(): void
+    {
+        $config = new ArticleConfiguration();
+        $config->setArticleId('article-123');
+        $config->setTemplateKey('article_blog');
+        $config->setData(['layoutStyle' => 'wide', 'showToc' => true, 'obsoleteKey' => 'x']);
+
+        $this->repository->method('findByArticleId')->willReturn($config);
+
+        $result = $this->resolver->resolve('article-123', 'article_blog');
+
+        $this->assertSame('wide', $result['layoutStyle']);
+        $this->assertSame('image', $result['heroVariant']);
+        $this->assertTrue($result['showRelated']);
+        $this->assertArrayNotHasKey('showToc', $result);
+        $this->assertArrayNotHasKey('obsoleteKey', $result);
+    }
+
+    public function testResolveHardcodedUsesSchemaOfTemplate(): void
+    {
+        $this->repository->method('findByArticleId')->willReturn(null);
+        $this->repository->method('findDefaultForTemplate')->willReturn(null);
+
+        $result = $this->resolver->resolve('article-123', 'article_blog');
+
+        $this->assertArrayNotHasKey('showToc', $result);
+        $this->assertSame('image', $result['heroVariant']);
+        $this->assertFalse($result['default']);
+    }
+
+    public function testResolveWithoutTemplateKeyUsesBaseSchema(): void
+    {
+        $this->repository->method('findByArticleId')->willReturn(null);
+
+        $result = $this->resolver->resolve('article-123');
+
+        $this->assertTrue($result['showToc']);
+        $this->assertArrayNotHasKey('heroVariant', $result);
+        $this->assertNull($result['templateKey']);
+    }
+
+    public function testGetForArticleAndTemplateDefault(): void
+    {
+        $config = new ArticleConfiguration();
+        $this->repository->method('findByArticleId')->with('a')->willReturn($config);
+        $this->repository->method('findDefaultForTemplate')->with('t')->willReturn($config);
+
+        $this->assertSame($config, $this->resolver->getForArticle('a'));
+        $this->assertSame($config, $this->resolver->getTemplateDefault('t'));
     }
 }
