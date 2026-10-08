@@ -63,10 +63,10 @@ class ArticleConfigurationAdminTest extends TestCase
 
         $formViewBuilder->expects($this->exactly(4))->method('setFormKey')
             ->withConsecutive(
-                ['article_configuration_article_blog'],
-                ['article_configuration_article_blog'],
-                ['article_configuration_article_news'],
-                ['article_configuration_article_news']
+                ['article_configuration_template_article_blog'],
+                ['article_configuration_template_article_blog'],
+                ['article_configuration_template_article_news'],
+                ['article_configuration_template_article_news']
             );
         $formViewBuilder->expects($this->exactly(4))->method('setTabCondition')
             ->withConsecutive(

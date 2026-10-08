@@ -48,4 +48,3 @@ sulu_article_configuration:
     custom_css_class:
         title: "CSS Class"
         info: "Custom CSS class for the article container."
-    custom_options: "Additional Options"

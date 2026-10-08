@@ -14,16 +14,21 @@ services:
         arguments:
             - '@sulu_admin.metadata_group_provider'
 
-    Manuxi\SuluArticleConfigurationBundle\Schema\ConfigurationSchema:
+    Manuxi\SuluArticleConfigurationBundle\Admin\FormMetadata\ArticleConfigurationFormComposer:
         arguments:
-            - '%sulu_article_configuration.schema%'
+            - '@sulu_admin.xml_form_metadata_loader'
             - '@Manuxi\SuluArticleConfigurationBundle\Service\ArticleGroupProvider'
+            - '@sulu_admin.schema_metadata_provider'
 
     Manuxi\SuluArticleConfigurationBundle\Admin\FormMetadata\ArticleConfigurationFormMetadataLoader:
         arguments:
-            - '@Manuxi\SuluArticleConfigurationBundle\Schema\ConfigurationSchema'
+            - '@Manuxi\SuluArticleConfigurationBundle\Admin\FormMetadata\ArticleConfigurationFormComposer'
         tags:
             - { name: 'sulu_admin.form_metadata_loader' }
+
+    Manuxi\SuluArticleConfigurationBundle\Schema\ConfigurationSchema:
+        arguments:
+            - '@Manuxi\SuluArticleConfigurationBundle\Admin\FormMetadata\ArticleConfigurationFormComposer'
 
     Manuxi\SuluArticleConfigurationBundle\Command\MigrateToJsonCommand:
         arguments:

@@ -2,91 +2,120 @@
 
 [🇩🇪 Deutsche Version](configuration.de.md)
 
-The fields of the "Configuration" tab are defined by a **schema** in your project configuration. The values of an
-article are stored as JSON in the column `data` of `ar_article_configuration`, so adding or removing a field never
-needs a database change.
+The fields of the "Configuration" tab are defined with plain **Sulu form XML**, the same format as the files in
+`config/forms/`. The values of an article are stored as JSON in the column `data` of `ar_article_configuration`, so
+adding or removing a field never needs a database change.
 
 ## Levels
 
-The schema of an article is resolved from four levels. A later level overrides the earlier one:
+The form of an article template is composed from three XML forms. A later level changes the earlier one, every
+level is optional:
 
-| Level | Config key | Applies to |
-|-------|------------|------------|
-| 1. Built-in | - | all articles (the 11 fields shipped with the bundle) |
-| 2. Default | `default` | all articles |
-| 3. Group | `groups.<group>` | all templates of an article group (the `<group>` of the template XML) |
-| 4. Template | `templates.<templateKey>` | a single template |
+| Level | `<key>` of the form | File in your project |
+|-------|---------------------|----------------------|
+| 1. Base | `article_configuration` | shipped with the bundle (the 11 standard fields), can be extended |
+| 2. Group | `article_configuration_group_<group>` | `config/article_configuration/group_<group>.xml` |
+| 3. Template | `article_configuration_template_<templateKey>` | `config/article_configuration/template_<templateKey>.xml` |
 
-The Sulu admin shows exactly one "Configuration" tab per article, built from the schema of the template the article
-uses. Changing the template of an article and saving it switches the tab.
+- `<group>` is the `<group>` of the article template XML, `<templateKey>` the `<key>` of the article template.
+- The directory `config/article_configuration/` is registered automatically as soon as it exists, no further
+  configuration is needed. Put exactly **one file per key** into it.
+- The Sulu admin shows one "Configuration" tab per article, built from the form of the template the article uses.
+  Changing the template of an article and saving it switches the tab.
 
-## Configuration
+## What a level can do
 
-`config/packages/sulu_article_configuration.yaml`:
+Group and template files only contain the differences:
 
-```yaml
-sulu_article_configuration:
-    default:
-        fields:
-            layoutStyle:
-                default: narrow              # change the default value of a built-in field
-            customCssClass: false            # remove a field everywhere
-    groups:
-        blog:
-            fields:
-                heroVariant:                 # add a field for all templates of the group "blog"
-                    type: single_select
-                    values: [image, video]
-                    default: image
-                    section: hero
-    templates:
-        blog_post:
-            fields:
-                showToc: false               # remove a field for this template only
-                layoutStyle:
-                    values: [narrow, wide]   # change the options of a field for this template only
-                    default: narrow
-                readingSpeed:
-                    type: number
-                    default: 200
+| You want to | You write |
+|-------------|-----------|
+| add a field | a `<property>` in a `<section>` (a new section is created if the name is unknown) |
+| change a field | a `<property>` with the same `name`. It replaces the whole definition of the field and keeps its position |
+| remove a field | the property with `<tag name="article_configuration.remove"/>` |
+| rename or relabel a section | a `<section>` with the same `name` and a `<meta><title>`; its fields are merged with the existing ones |
+
+Field names are the JSON keys, so they must be unique across the whole form. A field removed on one level can be
+added again on a later level. Sections that end up empty disappear.
+
+Example `config/article_configuration/template_blog_post.xml`:
+
+```xml
+<?xml version="1.0" ?>
+<form xmlns="http://schemas.sulu.io/template/template"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://schemas.sulu.io/template/template http://schemas.sulu.io/template/form-1.0.xsd"
+>
+    <key>article_configuration_template_blog_post</key>
+    <properties>
+        <section name="display_options">
+            <properties>
+                <property name="showToc" type="checkbox">
+                    <tag name="article_configuration.remove"/>
+                </property>
+                <property name="layoutStyle" type="single_select" colspan="6">
+                    <meta>
+                        <title>sulu_article_configuration.layout_style.title</title>
+                    </meta>
+                    <params>
+                        <param name="default_value" value="narrow"/>
+                        <param name="values" type="collection">
+                            <param name="narrow">
+                                <meta><title>sulu_article_configuration.layout_style.narrow</title></meta>
+                            </param>
+                            <param name="wide">
+                                <meta><title>sulu_article_configuration.layout_style.wide</title></meta>
+                            </param>
+                        </param>
+                    </params>
+                </property>
+            </properties>
+        </section>
+        <section name="more">
+            <meta>
+                <title>app.more</title>
+            </meta>
+            <properties>
+                <property name="readingSpeed" type="number">
+                    <meta>
+                        <title lang="en">Words per minute</title>
+                        <title lang="de">Wörter pro Minute</title>
+                    </meta>
+                    <params>
+                        <param name="default_value" value="200"/>
+                    </params>
+                </property>
+            </properties>
+        </section>
+    </properties>
+</form>
 ```
 
-Overriding a field merges the given options into the existing definition, only `values` is replaced as a whole.
-`false` removes the field. A field that does not exist yet needs at least a `type`.
+After changing or adding XML files, clear the cache (`bin/adminconsole cache:clear`). This is also needed once after
+creating the directory `config/article_configuration/` for the first time. In debug mode Sulu rebuilds the forms on
+demand.
 
-After changing the schema, clear the cache: `bin/console cache:clear` (Sulu caches the form metadata).
+## Value types
 
-## Field options
+The type of a value follows the field type in the XML, the default comes from the param `default_value`.
+Values sent by the admin are validated against the form: unknown keys are dropped and wrong values fall back to the
+default.
 
-| Option | Description |
-|--------|-------------|
-| `type` | `toggle` (bool), `text` (string or null), `single_select` (one of `values`), `number` (int or float) |
-| `default` | Default value. `toggle` defaults to `false`, `single_select` to the first value, the others to `null` |
-| `values` | List of allowed values, required for `single_select` |
-| `section` | Name of the section (group box) in the form. Fields without a section go to "Additional Options" |
-| `colspan` | Width in the 12 column grid, e.g. `6` |
-| `visible_condition` | Sulu condition on the other fields of the form, e.g. `enableSidebar == true` |
+| Field type | Stored as | Default |
+|------------|-----------|---------|
+| `checkbox` | bool | `default_value`, otherwise `false` |
+| `single_select` | one of the `values` | `default_value` if allowed, otherwise the first value |
+| `select` | list of allowed `values` | empty list |
+| `number` | int or float | `default_value` if numeric, otherwise `null` |
+| `text_line`, `text_area`, `email`, `url`, `phone`, `color`, `date`, `time`, `datetime` | string or `null` | `default_value` or `null` |
+| everything else, e.g. `media_selection` | stored as delivered (JSON compatible) | `null` |
 
-Values sent by the admin are validated against the schema: unknown keys are dropped, wrong types fall back to the
-default, a `single_select` only accepts its `values`.
+The field `default` ("Use as default") is reserved: it is kept in its own column and is not part of `data`.
 
 ## Translations
 
-Labels are translation keys in the `admin` domain, derived from the field name in snake_case. Add them to your
-project, e.g. `translations/admin.en.yaml`:
-
-```yaml
-sulu_article_configuration:
-    hero: "Hero"                      # label of the section "hero"
-    hero_variant:                     # field "heroVariant"
-        title: "Hero variant"
-        info: "Image or video in the article header."
-        image: "Image"                # one key per value of a select
-        video: "Video"
-```
-
-The fields shipped with the bundle are already translated (German and English). Missing keys are shown as the
-plain key.
+Titles and info texts are normal Sulu `<meta>` elements: either a translation key of the `admin` domain or text per
+language (`<title lang="de">`). The standard fields are translated in German and English by the bundle. For your own
+fields add the keys to your project, e.g. `translations/admin.en.yaml`.
 
 ## Frontend
 
@@ -95,13 +124,13 @@ All fields, including your own, are available in Twig:
 ```twig
 {% set articleConfig = article_config(uuid, template) %}
 
-{% if articleConfig.heroVariant == 'video' %}
+{% if articleConfig.readingSpeed > 0 %}
     ...
 {% endif %}
 ```
 
 `configSource` still tells where the values come from (`article`, `template_default`, `hardcoded`). `hardcoded`
-means the defaults of the schema. Only the fields of the template's schema are returned, values stored for fields
+means the defaults of the form. Only the fields of the form of the template are returned: values stored for fields
 that were removed later are ignored and fields added later are filled with their default.
 
 ## Upgrading from 2.x
@@ -110,11 +139,11 @@ that were removed later are ignored and fields added later are filled with their
 update, otherwise the old values are lost:
 
 ```bash
-php bin/console sulu:article-configuration:migrate-to-json --dry-run
-php bin/console sulu:article-configuration:migrate-to-json
-php bin/console doctrine:schema:update --force
+php bin/adminconsole sulu:article-configuration:migrate-to-json --dry-run
+php bin/adminconsole sulu:article-configuration:migrate-to-json
+php bin/adminconsole doctrine:schema:update --force
 ```
 
 The command adds the column `data`, copies the old columns into it and can be run repeatedly. The schema update
-afterwards drops the old columns. The Twig API and the field names are unchanged, a bundle default of the previous
-`layoutStyle` column (`default`) no longer exists, new articles use the schema default (`fullwidth`).
+afterwards drops the old columns. The Twig API and the names of the standard fields are unchanged, the former column
+default of `layoutStyle` (`default`) no longer exists, new articles use the default of the form (`fullwidth`).

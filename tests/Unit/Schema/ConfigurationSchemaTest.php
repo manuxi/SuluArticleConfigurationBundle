@@ -5,101 +5,83 @@ declare(strict_types=1);
 namespace Manuxi\SuluArticleConfigurationBundle\Tests\Unit\Schema;
 
 use Manuxi\SuluArticleConfigurationBundle\Schema\ConfigurationSchema;
-use Manuxi\SuluArticleConfigurationBundle\Service\ArticleGroupProvider;
+use Manuxi\SuluArticleConfigurationBundle\Schema\FieldDefinition;
+use Manuxi\SuluArticleConfigurationBundle\Tests\Support\TestSchemaFactory;
 use PHPUnit\Framework\TestCase;
 
 class ConfigurationSchemaTest extends TestCase
 {
-    /**
-     * @param array<string, mixed> $config
-     */
-    private function createSchema(array $config): ConfigurationSchema
-    {
-        $groupProvider = $this->createMock(ArticleGroupProvider::class);
-        $groupProvider->method('getGroupIdentifier')->willReturnMap([
-            ['blog_post', 'blog'],
-            ['page_simple', 'default'],
-        ]);
+    private ConfigurationSchema $schema;
 
-        return new ConfigurationSchema($config, $groupProvider);
+    protected function setUp(): void
+    {
+        $this->schema = TestSchemaFactory::createSchema();
     }
 
-    public function testBuiltInFieldsWithoutConfiguration(): void
+    public function testBaseFieldsOfTheBundleForm(): void
     {
-        $schema = $this->createSchema([]);
-
         $this->assertSame(
             [
                 'layoutStyle', 'showToc', 'showReadingTime', 'showAuthorBox', 'showRelated', 'enableSidebar',
                 'sidebarPosition', 'enableShareButtons', 'enablePrint', 'hidePublishDate', 'customCssClass',
             ],
-            \array_keys($schema->getFields())
+            \array_keys($this->schema->getFields())
         );
-        $this->assertSame('fullwidth', $schema->getDefaults()['layoutStyle']);
-        $this->assertTrue($schema->getDefaults()['showToc']);
-        $this->assertNull($schema->getDefaults()['customCssClass']);
     }
 
-    public function testDefaultLevelOverridesBuiltIn(): void
+    public function testBaseDefaults(): void
     {
-        $schema = $this->createSchema([
-            'default' => ['fields' => ['layoutStyle' => ['default' => 'narrow'], 'customCssClass' => false]],
-        ]);
+        $defaults = $this->schema->getDefaults();
 
-        $this->assertSame('narrow', $schema->getDefaults()['layoutStyle']);
-        $this->assertArrayNotHasKey('customCssClass', $schema->getFields());
-        $this->assertSame(['default', 'wide', 'fullwidth', 'narrow'], $schema->getFields()['layoutStyle']->getValues());
+        $this->assertSame('fullwidth', $defaults['layoutStyle']);
+        $this->assertTrue($defaults['showToc']);
+        $this->assertSame('right', $defaults['sidebarPosition']);
+        $this->assertFalse($defaults['hidePublishDate']);
+        $this->assertNull($defaults['customCssClass']);
     }
 
-    public function testGroupLevelAddsFieldsOnlyForTemplatesOfThatGroup(): void
+    public function testDefaultToggleIsNotPartOfTheData(): void
     {
-        $schema = $this->createSchema([
-            'groups' => ['blog' => ['fields' => ['heroVariant' => ['type' => 'single_select', 'values' => ['image', 'video']]]]],
-        ]);
-
-        $this->assertArrayHasKey('heroVariant', $schema->getFields('blog_post'));
-        $this->assertArrayNotHasKey('heroVariant', $schema->getFields('page_simple'));
-        $this->assertArrayNotHasKey('heroVariant', $schema->getFields());
+        $this->assertArrayNotHasKey('default', $this->schema->getFields());
     }
 
-    public function testTemplateLevelWinsOverGroupLevel(): void
+    public function testTemplateWithoutOwnXmlUsesBase(): void
     {
-        $schema = $this->createSchema([
-            'groups' => ['blog' => ['fields' => ['showToc' => ['default' => false], 'showRelated' => false]]],
-            'templates' => ['blog_post' => ['fields' => [
-                'showToc' => ['default' => true],
-                'layoutStyle' => ['values' => ['narrow', 'wide'], 'default' => 'narrow'],
-            ]]],
-        ]);
+        $this->assertSame($this->schema->getDefaults(), $this->schema->getDefaults('some_other_template'));
+    }
 
-        $fields = $schema->getFields('blog_post');
-        $this->assertTrue($fields['showToc']->getDefault());
-        $this->assertArrayNotHasKey('showRelated', $fields);
+    public function testBlogTemplateComposesBaseGroupAndTemplate(): void
+    {
+        $fields = $this->schema->getFields(TestSchemaFactory::BLOG_TEMPLATE);
+
+        $this->assertArrayNotHasKey('showToc', $fields, 'removed by the template');
+        $this->assertArrayHasKey('showSummary', $fields, 'added by the group');
+        $this->assertArrayHasKey('heroVariant', $fields, 'added by the group');
+        $this->assertArrayHasKey('readingSpeed', $fields, 'added by the template');
         $this->assertSame(['narrow', 'wide'], $fields['layoutStyle']->getValues());
-        $this->assertSame('narrow', $fields['layoutStyle']->getDefault());
+
+        $defaults = $this->schema->getDefaults(TestSchemaFactory::BLOG_TEMPLATE);
+        $this->assertSame('narrow', $defaults['layoutStyle']);
+        $this->assertTrue($defaults['showSummary']);
+        $this->assertSame('video', $defaults['heroVariant']);
+        $this->assertSame(200, $defaults['readingSpeed']);
+        $this->assertNull($defaults['gallery']);
     }
 
-    public function testUnknownTemplateUsesDefaultLevelOnly(): void
+    public function testFieldKinds(): void
     {
-        $schema = $this->createSchema(['templates' => ['blog_post' => ['fields' => ['showToc' => false]]]]);
+        $fields = $this->schema->getFields(TestSchemaFactory::BLOG_TEMPLATE);
 
-        $this->assertArrayHasKey('showToc', $schema->getFields('other_template'));
-    }
-
-    public function testNewFieldWithoutTypeIsRejected(): void
-    {
-        $schema = $this->createSchema(['templates' => ['blog_post' => ['fields' => ['broken' => ['default' => 1]]]]]);
-
-        $this->expectException(\InvalidArgumentException::class);
-
-        $schema->getFields('blog_post');
+        $this->assertSame(FieldDefinition::KIND_NUMBER, $fields['readingSpeed']->getKind());
+        $this->assertSame(FieldDefinition::KIND_RAW, $fields['gallery']->getKind());
+        $this->assertSame(FieldDefinition::KIND_SINGLE_SELECT, $fields['heroVariant']->getKind());
+        $this->assertSame(FieldDefinition::KIND_TOGGLE, $fields['showSummary']->getKind());
+        $this->assertSame(FieldDefinition::KIND_TEXT, $fields['customCssClass']->getKind());
     }
 
     public function testSanitizeDropsUnknownKeysCastsValuesAndFillsDefaults(): void
     {
-        $schema = $this->createSchema([]);
-
-        $result = $schema->sanitize(null, [
+        $result = $this->schema->sanitize(null, [
             'layoutStyle' => 'invalid',
             'showToc' => 'false',
             'unknownKey' => 'x',
@@ -111,5 +93,22 @@ class ConfigurationSchemaTest extends TestCase
         $this->assertFalse($result['showToc']);
         $this->assertTrue($result['showRelated']);
         $this->assertSame('my-class', $result['customCssClass']);
+    }
+
+    public function testSanitizeUsesTheSchemaOfTheTemplate(): void
+    {
+        $result = $this->schema->sanitize(TestSchemaFactory::BLOG_TEMPLATE, [
+            'showToc' => false,
+            'layoutStyle' => 'fullwidth',
+            'heroVariant' => 'image',
+            'readingSpeed' => '250',
+            'gallery' => [['id' => 5]],
+        ]);
+
+        $this->assertArrayNotHasKey('showToc', $result);
+        $this->assertSame('narrow', $result['layoutStyle'], 'fullwidth is not allowed for the template');
+        $this->assertSame('image', $result['heroVariant']);
+        $this->assertSame(250, $result['readingSpeed']);
+        $this->assertSame([['id' => 5]], $result['gallery']);
     }
 }

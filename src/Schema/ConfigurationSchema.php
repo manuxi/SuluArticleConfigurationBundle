@@ -4,25 +4,25 @@ declare(strict_types=1);
 
 namespace Manuxi\SuluArticleConfigurationBundle\Schema;
 
-use Manuxi\SuluArticleConfigurationBundle\Service\ArticleGroupProvider;
+use Manuxi\SuluArticleConfigurationBundle\Admin\FormMetadata\ArticleConfigurationFormComposer;
 
 /**
- * Resolves the field schema of an article template: built-in fields, overridden by the "default" level of the
- * bundle configuration, then by the article group of the template, then by the template itself.
+ * The typed fields of an article template, derived from the composed XML form.
  */
 class ConfigurationSchema
 {
+    /**
+     * Stored in its own column, not part of the JSON data.
+     */
+    public const RESERVED_FIELD = 'default';
+
     /**
      * @var array<string, array<string, FieldDefinition>>
      */
     private array $cache = [];
 
-    /**
-     * @param array{default?: array<string, mixed>, groups?: array<string, mixed>, templates?: array<string, mixed>} $config
-     */
     public function __construct(
-        private readonly array $config,
-        private readonly ArticleGroupProvider $groupProvider,
+        private readonly ArticleConfigurationFormComposer $composer,
     ) {
     }
 
@@ -36,27 +36,20 @@ class ConfigurationSchema
             return $this->cache[$cacheKey];
         }
 
-        $raw = $this->merge(DefaultFields::all(), $this->config['default']['fields'] ?? []);
-
-        if (null !== $templateKey) {
-            $group = $this->groupProvider->getGroupIdentifier($templateKey);
-            if (null !== $group) {
-                $raw = $this->merge($raw, $this->config['groups'][$group]['fields'] ?? []);
+        $fields = [];
+        foreach ($this->composer->compose($templateKey)->getFlatFieldMetadata() as $name => $field) {
+            if (self::RESERVED_FIELD === $name) {
+                continue;
             }
 
-            $raw = $this->merge($raw, $this->config['templates'][$templateKey]['fields'] ?? []);
-        }
-
-        $fields = [];
-        foreach ($raw as $name => $definition) {
-            $fields[$name] = FieldDefinition::fromArray($name, $definition);
+            $fields[$name] = FieldDefinition::fromMetadata($field);
         }
 
         return $this->cache[$cacheKey] = $fields;
     }
 
     /**
-     * @return array<string, bool|int|float|string|null>
+     * @return array<string, mixed>
      */
     public function getDefaults(?string $templateKey = null): array
     {
@@ -73,7 +66,7 @@ class ConfigurationSchema
      *
      * @param array<string, mixed> $data
      *
-     * @return array<string, bool|int|float|string|null>
+     * @return array<string, mixed>
      */
     public function sanitize(?string $templateKey, array $data): array
     {
@@ -83,26 +76,5 @@ class ConfigurationSchema
         }
 
         return $result;
-    }
-
-    /**
-     * @param array<string, array<string, mixed>>   $base
-     * @param array<string, array<string, mixed>|false> $override
-     *
-     * @return array<string, array<string, mixed>>
-     */
-    private function merge(array $base, array $override): array
-    {
-        foreach ($override as $name => $definition) {
-            if (false === $definition) {
-                unset($base[$name]);
-
-                continue;
-            }
-
-            $base[$name] = \array_replace($base[$name] ?? [], $definition);
-        }
-
-        return $base;
     }
 }

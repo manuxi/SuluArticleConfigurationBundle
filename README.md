@@ -30,7 +30,7 @@ It allows managing additional display options, features, and publication setting
 - **Design** - Custom CSS classes
 
 ### 🧩 Configurable Fields
-- **YAML schema** - Add, change or remove fields in your project configuration, no database change needed
+- **Sulu form XML** - Add, change or remove fields with plain Sulu form XML in your project, no database change needed
 - **Per group and per template** - Every template can have its own set of fields, see [docs/configuration.en.md](docs/configuration.en.md)
 
 ### 🔄 Default-Configuration
@@ -115,20 +115,31 @@ Now all other articles with this template will automatically use these settings 
 
 ### Custom Fields
 
-The fields of the "Configuration" tab are defined by a schema. The bundle ships the fields listed below; your project
-can change them or add its own - globally, per article group or per template:
+The fields of the "Configuration" tab are defined with Sulu form XML. The bundle ships the fields listed below; your
+project can change them or add its own - for all articles, per article group or per template. Drop the files into
+`config/article_configuration/` (registered automatically):
 
-```yaml
-sulu_article_configuration:
-    templates:
-        blog_post:
-            fields:
-                showToc: false
-                heroVariant: { type: single_select, values: [image, video], default: image }
+```
+config/article_configuration/
+    group_blog.xml            <key>article_configuration_group_blog</key>
+    template_blog_post.xml    <key>article_configuration_template_blog_post</key>
+```
+
+The files only contain the differences to the level before. A new `<property>` adds a field, a property with the
+same name replaces it, and `<tag name="article_configuration.remove"/>` removes it:
+
+```xml
+<section name="display_options">
+    <properties>
+        <property name="showToc" type="checkbox">
+            <tag name="article_configuration.remove"/>
+        </property>
+    </properties>
+</section>
 ```
 
 Values are stored as JSON, so a new field never needs a schema update. See [docs/configuration.en.md](docs/configuration.en.md)
-for all options, translations and the levels.
+for the levels, value types, translations and a complete example.
 
 ### Frontend Usage (Twig)
 

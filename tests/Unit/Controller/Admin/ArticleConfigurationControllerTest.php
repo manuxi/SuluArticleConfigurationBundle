@@ -10,8 +10,7 @@ use FOS\RestBundle\View\ViewHandlerInterface;
 use Manuxi\SuluArticleConfigurationBundle\Controller\Admin\ArticleConfigurationController;
 use Manuxi\SuluArticleConfigurationBundle\Entity\ArticleConfiguration;
 use Manuxi\SuluArticleConfigurationBundle\Repository\ArticleConfigurationRepository;
-use Manuxi\SuluArticleConfigurationBundle\Schema\ConfigurationSchema;
-use Manuxi\SuluArticleConfigurationBundle\Service\ArticleGroupProvider;
+use Manuxi\SuluArticleConfigurationBundle\Tests\Support\TestSchemaFactory;
 use PHPUnit\Framework\TestCase;
 use Sulu\Article\Domain\Model\ArticleDimensionContentInterface;
 use Sulu\Article\Domain\Model\ArticleInterface;
@@ -37,17 +36,12 @@ class ArticleConfigurationControllerTest extends TestCase
         $this->contentAggregator = $this->createMock(ContentAggregatorInterface::class);
         $this->viewHandler = $this->createMock(ViewHandlerInterface::class);
 
-        $groupProvider = $this->createMock(ArticleGroupProvider::class);
-        $groupProvider->method('getGroupIdentifier')->willReturn('default');
-
         $this->controller = new ArticleConfigurationController(
             $this->repository,
             $this->entityManager,
             $this->articleRepository,
             $this->contentAggregator,
-            new ConfigurationSchema([
-                'templates' => ['article_blog' => ['fields' => ['showRelated' => false]]],
-            ], $groupProvider),
+            TestSchemaFactory::createSchema(),
             $this->viewHandler
         );
     }
@@ -77,7 +71,7 @@ class ArticleConfigurationControllerTest extends TestCase
         $configuration->setArticleId($articleId);
         $configuration->setTemplateKey($templateKey);
         $configuration->setDefault(true);
-        $configuration->setData(['layoutStyle' => 'wide', 'showRelated' => true]);
+        $configuration->setData(['layoutStyle' => 'wide']);
 
         $this->repository->expects($this->once())
             ->method('findByArticleId')
@@ -308,7 +302,7 @@ class ArticleConfigurationControllerTest extends TestCase
     public function testPutActionStoresSanitizedDataFromSchema(): void
     {
         $articleId = '123-456';
-        $this->mockArticleWithTemplateKey('article_blog');
+        $this->mockArticleWithTemplateKey(TestSchemaFactory::BLOG_TEMPLATE);
 
         $configuration = new ArticleConfiguration();
         $configuration->setArticleId($articleId);
@@ -316,9 +310,10 @@ class ArticleConfigurationControllerTest extends TestCase
         $this->viewHandler->method('handle')->willReturn(new Response());
 
         $request = new Request([], [], [], [], [], [], json_encode([
-            'layoutStyle' => 'invalid-layout',
+            'layoutStyle' => 'fullwidth',
             'showToc' => false,
-            'showRelated' => true,
+            'showRelated' => false,
+            'readingSpeed' => '300',
             'customCssClass' => ' highlight ',
             'injected' => 'value',
         ]));
@@ -326,22 +321,23 @@ class ArticleConfigurationControllerTest extends TestCase
         $this->controller->putAction($articleId, $request);
 
         $data = $configuration->getData();
-        $this->assertSame('fullwidth', $data['layoutStyle']);
-        $this->assertFalse($data['showToc']);
+        $this->assertSame('narrow', $data['layoutStyle'], 'Values outside of the template options fall back to its default.');
+        $this->assertArrayNotHasKey('showToc', $data, 'Fields removed for the template must not be stored.');
+        $this->assertFalse($data['showRelated']);
+        $this->assertSame(300, $data['readingSpeed']);
         $this->assertSame('highlight', $data['customCssClass']);
         $this->assertArrayNotHasKey('injected', $data);
-        $this->assertArrayNotHasKey('showRelated', $data, 'Fields removed for the template must not be stored.');
         $this->assertTrue($data['enableSidebar']);
     }
 
     public function testPutActionCastsDefaultFlagToBool(): void
     {
         $articleId = '123-456';
-        $this->mockArticleWithTemplateKey('article_blog');
+        $this->mockArticleWithTemplateKey(TestSchemaFactory::BLOG_TEMPLATE);
 
         $configuration = new ArticleConfiguration();
         $this->repository->method('findByArticleId')->willReturn($configuration);
-        $this->repository->expects($this->once())->method('clearDefaultsForTemplate')->with('article_blog', $articleId);
+        $this->repository->expects($this->once())->method('clearDefaultsForTemplate')->with(TestSchemaFactory::BLOG_TEMPLATE, $articleId);
         $this->viewHandler->method('handle')->willReturn(new Response());
 
         $this->controller->putAction($articleId, new Request([], [], [], [], [], [], json_encode(['default' => 1])));
@@ -352,12 +348,12 @@ class ArticleConfigurationControllerTest extends TestCase
     public function testGetActionUsesTemplateSchemaOfTheArticle(): void
     {
         $articleId = 'test-uuid';
-        $this->mockArticleWithTemplateKey('article_blog');
+        $this->mockArticleWithTemplateKey(TestSchemaFactory::BLOG_TEMPLATE);
 
         $configuration = new ArticleConfiguration();
         $configuration->setArticleId($articleId);
         $configuration->setTemplateKey('old_template');
-        $configuration->setData(['showRelated' => true, 'layoutStyle' => 'narrow']);
+        $configuration->setData(['showToc' => true, 'layoutStyle' => 'wide']);
         $this->repository->method('findByArticleId')->willReturn($configuration);
 
         $this->viewHandler->expects($this->once())
@@ -365,9 +361,9 @@ class ArticleConfigurationControllerTest extends TestCase
             ->with($this->callback(function (View $view): bool {
                 $data = $view->getData();
 
-                return 'article_blog' === $data['templateKey']
-                    && 'narrow' === $data['layoutStyle']
-                    && !\array_key_exists('showRelated', $data);
+                return TestSchemaFactory::BLOG_TEMPLATE === $data['templateKey']
+                    && 'wide' === $data['layoutStyle']
+                    && !\array_key_exists('showToc', $data);
             }))
             ->willReturn(new Response());
 
@@ -381,13 +377,13 @@ class ArticleConfigurationControllerTest extends TestCase
 
         $configuration = new ArticleConfiguration();
         $configuration->setArticleId($articleId);
-        $configuration->setTemplateKey('article_blog');
+        $configuration->setTemplateKey(TestSchemaFactory::BLOG_TEMPLATE);
         $this->repository->method('findByArticleId')->willReturn($configuration);
 
         $this->viewHandler->expects($this->once())
             ->method('handle')
-            ->with($this->callback(static fn (View $view): bool => 'article_blog' === $view->getData()['templateKey']
-                && !\array_key_exists('showRelated', $view->getData())))
+            ->with($this->callback(static fn (View $view): bool => TestSchemaFactory::BLOG_TEMPLATE === $view->getData()['templateKey']
+                && !\array_key_exists('showToc', $view->getData())))
             ->willReturn(new Response());
 
         $this->controller->getAction($articleId, new Request());

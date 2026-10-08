@@ -4,84 +4,44 @@ declare(strict_types=1);
 
 namespace Manuxi\SuluArticleConfigurationBundle\Schema;
 
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\OptionMetadata;
+
+/**
+ * Describes how the value of one form field is typed, defaulted and cast. Derived from the Sulu form field.
+ */
 final class FieldDefinition
 {
-    public const TYPE_TOGGLE = 'toggle';
-    public const TYPE_TEXT = 'text';
-    public const TYPE_SINGLE_SELECT = 'single_select';
-    public const TYPE_NUMBER = 'number';
+    public const KIND_TOGGLE = 'toggle';
+    public const KIND_TEXT = 'text';
+    public const KIND_NUMBER = 'number';
+    public const KIND_SINGLE_SELECT = 'single_select';
+    public const KIND_MULTI_SELECT = 'multi_select';
+    public const KIND_RAW = 'raw';
 
-    public const TYPES = [
-        self::TYPE_TOGGLE,
-        self::TYPE_TEXT,
-        self::TYPE_SINGLE_SELECT,
-        self::TYPE_NUMBER,
-    ];
-
-    public const DEFAULT_SECTION = 'custom_options';
-    public const TRANSLATION_ROOT = 'sulu_article_configuration';
+    private const TEXT_TYPES = ['text_line', 'text_area', 'email', 'url', 'phone', 'color', 'date', 'time', 'datetime'];
 
     /**
      * @param list<string> $values
      */
-    public function __construct(
+    private function __construct(
         private readonly string $name,
-        private readonly string $type,
-        private readonly bool|int|float|string|null $default,
+        private readonly string $kind,
+        private readonly mixed $default,
         private readonly array $values,
-        private readonly string $section,
-        private readonly ?int $colSpan,
-        private readonly ?string $visibleCondition,
     ) {
     }
 
-    /**
-     * @param array<string, mixed> $definition
-     */
-    public static function fromArray(string $name, array $definition): self
+    public static function fromMetadata(FieldMetadata $field): self
     {
-        $type = $definition['type'] ?? null;
-        if (!\is_string($type) || !\in_array($type, self::TYPES, true)) {
-            throw new \InvalidArgumentException(\sprintf(
-                'Field "%s" needs a valid type, one of: %s.',
-                $name,
-                \implode(', ', self::TYPES)
-            ));
-        }
+        $kind = self::resolveKind($field->getType());
+        $values = self::readValues($field);
+        $defaultOption = $field->findOption('default_value')?->getValue();
+        $defaultOption = \is_scalar($defaultOption) ? (string) $defaultOption : null;
 
-        $values = \array_map('strval', \array_values($definition['values'] ?? []));
-        if (self::TYPE_SINGLE_SELECT === $type && [] === $values) {
-            throw new \InvalidArgumentException(\sprintf('Field "%s" of type "%s" needs at least one value.', $name, $type));
-        }
+        $definition = new self($field->getName(), $kind, null, $values);
 
-        $default = $definition['default'] ?? null;
-        if (null === $default) {
-            $default = match ($type) {
-                self::TYPE_TOGGLE => false,
-                self::TYPE_SINGLE_SELECT => $values[0],
-                default => null,
-            };
-        }
-
-        $field = new self(
-            $name,
-            $type,
-            $default,
-            $values,
-            (string) ($definition['section'] ?? self::DEFAULT_SECTION),
-            isset($definition['colspan']) ? (int) $definition['colspan'] : null,
-            isset($definition['visible_condition']) ? (string) $definition['visible_condition'] : null,
-        );
-
-        return new self(
-            $name,
-            $type,
-            $field->sanitize($default),
-            $values,
-            $field->section,
-            $field->colSpan,
-            $field->visibleCondition,
-        );
+        return new self($field->getName(), $kind, $definition->resolveDefault($defaultOption), $values);
     }
 
     public function getName(): string
@@ -89,12 +49,12 @@ final class FieldDefinition
         return $this->name;
     }
 
-    public function getType(): string
+    public function getKind(): string
     {
-        return $this->type;
+        return $this->kind;
     }
 
-    public function getDefault(): bool|int|float|string|null
+    public function getDefault(): mixed
     {
         return $this->default;
     }
@@ -107,41 +67,64 @@ final class FieldDefinition
         return $this->values;
     }
 
-    public function getSection(): string
-    {
-        return $this->section;
-    }
-
-    public function getColSpan(): ?int
-    {
-        return $this->colSpan;
-    }
-
-    public function getVisibleCondition(): ?string
-    {
-        return $this->visibleCondition;
-    }
-
-    public function getTranslationPrefix(): string
-    {
-        return self::TRANSLATION_ROOT . '.' . self::toSnakeCase($this->name);
-    }
-
-    public static function toSnakeCase(string $value): string
-    {
-        return \strtolower((string) \preg_replace('/(?<!^)[A-Z]/', '_$0', $value));
-    }
-
     /**
      * Casts a raw value to the type of this field. Invalid values fall back to the default.
      */
-    public function sanitize(mixed $value): bool|int|float|string|null
+    public function sanitize(mixed $value): mixed
     {
-        return match ($this->type) {
-            self::TYPE_TOGGLE => $this->sanitizeToggle($value),
-            self::TYPE_TEXT => $this->sanitizeText($value),
-            self::TYPE_NUMBER => $this->sanitizeNumber($value),
-            self::TYPE_SINGLE_SELECT => $this->sanitizeSelect($value),
+        return match ($this->kind) {
+            self::KIND_TOGGLE => $this->sanitizeToggle($value),
+            self::KIND_TEXT => $this->sanitizeText($value),
+            self::KIND_NUMBER => $this->sanitizeNumber($value),
+            self::KIND_SINGLE_SELECT => $this->sanitizeSelect($value),
+            self::KIND_MULTI_SELECT => $this->sanitizeMultiSelect($value),
+            default => $this->sanitizeRaw($value),
+        };
+    }
+
+    private static function resolveKind(string $type): string
+    {
+        return match (true) {
+            'checkbox' === $type => self::KIND_TOGGLE,
+            'number' === $type => self::KIND_NUMBER,
+            'single_select' === $type => self::KIND_SINGLE_SELECT,
+            'select' === $type => self::KIND_MULTI_SELECT,
+            \in_array($type, self::TEXT_TYPES, true) => self::KIND_TEXT,
+            default => self::KIND_RAW,
+        };
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function readValues(FieldMetadata $field): array
+    {
+        $option = $field->findOption('values');
+        if (null === $option || !\is_array($option->getValue())) {
+            return [];
+        }
+
+        $values = [];
+        foreach ($option->getValue() as $valueOption) {
+            if ($valueOption instanceof OptionMetadata && null !== $valueOption->getName()) {
+                $values[] = (string) $valueOption->getName();
+            }
+        }
+
+        return $values;
+    }
+
+    private function resolveDefault(?string $configured): mixed
+    {
+        return match ($this->kind) {
+            self::KIND_TOGGLE => null !== $configured && \filter_var($configured, \FILTER_VALIDATE_BOOLEAN),
+            self::KIND_TEXT => '' === $configured ? null : $configured,
+            self::KIND_NUMBER => null !== $configured && \is_numeric($configured) ? $configured + 0 : null,
+            self::KIND_SINGLE_SELECT => null !== $configured && \in_array($configured, $this->values, true)
+                ? $configured
+                : ($this->values[0] ?? null),
+            self::KIND_MULTI_SELECT => [],
+            default => null,
         };
     }
 
@@ -155,9 +138,7 @@ final class FieldDefinition
             return (bool) $this->default;
         }
 
-        $parsed = \filter_var($value, \FILTER_VALIDATE_BOOLEAN, \FILTER_NULL_ON_FAILURE);
-
-        return $parsed ?? (bool) $this->default;
+        return \filter_var($value, \FILTER_VALIDATE_BOOLEAN, \FILTER_NULL_ON_FAILURE) ?? (bool) $this->default;
     }
 
     private function sanitizeText(mixed $value): ?string
@@ -190,8 +171,38 @@ final class FieldDefinition
             return (string) $value;
         }
 
-        return \is_string($this->default) && \in_array($this->default, $this->values, true)
-            ? $this->default
-            : ($this->values[0] ?? null);
+        return \is_string($this->default) ? $this->default : null;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function sanitizeMultiSelect(mixed $value): array
+    {
+        if (!\is_array($value)) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($value as $item) {
+            if (\is_scalar($item) && \in_array((string) $item, $this->values, true) && !\in_array((string) $item, $result, true)) {
+                $result[] = (string) $item;
+            }
+        }
+
+        return $result;
+    }
+
+    private function sanitizeRaw(mixed $value): mixed
+    {
+        if (null === $value || \is_scalar($value)) {
+            return $value;
+        }
+
+        if (\is_array($value)) {
+            return \array_filter($value, static fn (mixed $item): bool => !\is_object($item) && !\is_resource($item));
+        }
+
+        return null;
     }
 }

@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<form xmlns="http://schemas.sulu.io/template/template"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://schemas.sulu.io/template/template http://schemas.sulu.io/template/form-1.0.xsd"
+>
+    <key>article_configuration_group_blog</key>
+    <properties>
+        <section name="display_options">
+            <properties>
+                <property name="showSummary" type="checkbox" colspan="3">
+                    <meta>
+                        <title>app.show_summary.title</title>
+                    </meta>
+                    <params>
+                        <param name="type" value="toggler"/>
+                        <param name="default_value" value="true"/>
+                    </params>
+                </property>
+            </properties>
+        </section>
+        <section name="hero">
+            <meta>
+                <title>app.hero</title>
+            </meta>
+            <properties>
+                <property name="heroVariant" type="single_select">
+                    <params>
+                        <param name="default_value" value="video"/>
+                        <param name="values" type="collection">
+                            <param name="image"/>
+                            <param name="video"/>
+                        </param>
+                    </params>
+                </property>
+            </properties>
+        </section>
+    </properties>
+</form>

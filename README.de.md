@@ -30,7 +30,7 @@ Es ermöglicht die Verwaltung zusätzlicher Darstellungsoptionen, Features und V
 - **Design** - Custom CSS Klassen
 
 ### 🧩 Konfigurierbare Felder
-- **YAML-Schema** - Felder in der Projekt-Konfiguration hinzufügen, ändern oder entfernen, ohne Datenbank-Änderung
+- **Sulu-Formular-XML** - Felder per normalem Sulu-Formular-XML im Projekt hinzufügen, ändern oder entfernen, ohne Datenbank-Änderung
 - **Pro Group und pro Template** - Jedes Template kann eigene Felder haben, siehe [docs/configuration.de.md](docs/configuration.de.md)
 
 ### 🔄 Standard-Konfiguration für Templates
@@ -115,20 +115,31 @@ Nun verwenden alle anderen Artikel mit diesem Template automatisch diese Einstel
 
 ### Eigene Felder
 
-Die Felder des Tabs "Konfiguration" werden durch ein Schema festgelegt. Das Bundle liefert die unten aufgeführten
-Felder mit, dein Projekt kann sie ändern oder eigene hinzufügen - global, pro Artikel-Group oder pro Template:
+Die Felder des Tabs "Konfiguration" werden mit Sulu-Formular-XML definiert. Das Bundle liefert die unten aufgeführten
+Felder mit, dein Projekt kann sie ändern oder eigene hinzufügen - für alle Artikel, pro Artikel-Group oder pro
+Template. Lege die Dateien in `config/article_configuration/` (wird automatisch registriert):
 
-```yaml
-sulu_article_configuration:
-    templates:
-        blog_post:
-            fields:
-                showToc: false
-                heroVariant: { type: single_select, values: [image, video], default: image }
+```
+config/article_configuration/
+    group_blog.xml            <key>article_configuration_group_blog</key>
+    template_blog_post.xml    <key>article_configuration_template_blog_post</key>
 ```
 
-Die Werte werden als JSON gespeichert, ein neues Feld braucht also nie ein Schema-Update. Alle Optionen,
-Übersetzungen und Ebenen stehen in [docs/configuration.de.md](docs/configuration.de.md).
+Die Dateien enthalten nur die Unterschiede zur vorherigen Ebene. Eine neue `<property>` fügt ein Feld hinzu, eine
+Property mit gleichem Namen ersetzt es, und `<tag name="article_configuration.remove"/>` entfernt es:
+
+```xml
+<section name="display_options">
+    <properties>
+        <property name="showToc" type="checkbox">
+            <tag name="article_configuration.remove"/>
+        </property>
+    </properties>
+</section>
+```
+
+Die Werte werden als JSON gespeichert, ein neues Feld braucht also nie ein Schema-Update. Ebenen, Werte-Typen,
+Übersetzungen und ein vollständiges Beispiel stehen in [docs/configuration.de.md](docs/configuration.de.md).
 
 ### Frontend-Nutzung (Twig)
 

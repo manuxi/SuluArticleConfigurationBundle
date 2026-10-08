@@ -8,29 +8,33 @@
   `show_related`, `enable_share_buttons`, `enable_print`, `hide_publish_date` and `custom_css_class` are dropped. Run
   `sulu:article-configuration:migrate-to-json` before `doctrine:schema:update --force`, see
   [docs/configuration.en.md](docs/configuration.en.md).
-- The form key `article_configuration` is replaced by one generated form per template (`article_configuration_<templateKey>`).
-  `forms/article_configuration.xml` is removed.
+- The admin form key `article_configuration` is no longer loaded by the tab. Each template gets its own composed form
+  `article_configuration_template_<templateKey>`; `article_configuration` is now the base level of that composition.
 - `ArticleConfigurationAdmin` takes `ArticleGroupProvider` instead of `GroupProviderInterface`.
 - `ArticleConfigurationResolver` and `ArticleConfigurationController` take `ConfigurationSchema` as an additional argument.
 - `ArticleConfiguration` loses the typed getters/setters of the former columns, use `getData()`/`setData()`.
-- The `layoutStyle` column default `default` is gone, new articles use the schema default `fullwidth`.
+- The `layoutStyle` column default `default` is gone, new articles use the form default `fullwidth`.
 
 ### Added
-- YAML schema `sulu_article_configuration` with the levels `default`, `groups.<group>` and `templates.<templateKey>`:
-  add, change and remove fields; types `toggle`, `text`, `single_select`, `number`.
+- Configuration with Sulu form XML on three levels: base (`article_configuration`, shipped), article group
+  (`article_configuration_group_<group>`) and template (`article_configuration_template_<templateKey>`).
+  Files in `config/article_configuration/` are registered automatically; group and template files only contain the
+  differences: new fields and sections, replaced fields and fields removed with `<tag name="article_configuration.remove"/>`.
 - One "Configuration" tab per template, shown by the tab condition `template == '<templateKey>'`.
-- `ArticleConfigurationFormMetadataLoader` builds the admin form from the schema (tag `sulu_admin.form_metadata_loader`).
-- `ConfigurationSchema`, `FieldDefinition` (validation and casting of values) and `ArticleGroupProvider`
-  (resolves the group of a template, keeps the `getGroups` compatibility for Sulu before and after 3.0.9).
+- `ArticleConfigurationFormComposer` composes the form of a template; `ArticleConfigurationFormMetadataLoader`
+  serves it to the admin (tag `sulu_admin.form_metadata_loader`) including the validation schema of the composed fields.
+- `ConfigurationSchema` and `FieldDefinition` derive the typed fields from the composed form: `checkbox` as bool,
+  `single_select`/`select` restricted to their values, `number`, text types as string, any other type (e.g.
+  `media_selection`) stored as delivered. Values from the admin are validated against it.
+- `ArticleGroupProvider` resolves the article group of a template and keeps the `getGroups` compatibility for Sulu
+  before and after 3.0.9.
 - Console command `sulu:article-configuration:migrate-to-json` with `--dry-run`.
-- Translation key `sulu_article_configuration.custom_options` (section of fields without a section).
 - Documentation: `docs/configuration.en.md`, `docs/configuration.de.md`.
 
 ### Changed
 - Doctrine mapping moved from PHP attributes to `Resources/config/doctrine/ArticleConfiguration.orm.xml`.
-- The values returned by `article_configuration()`/`article_config()` contain only the fields of the schema of the
-  template; missing values are filled with the schema default. `configSource: hardcoded` now means the schema defaults.
-- Values sent by the admin are validated against the schema (unknown keys dropped, wrong types fall back to the default).
+- The values returned by `article_configuration()`/`article_config()` contain only the fields of the form of the
+  template; missing values are filled with the form default. `configSource: hardcoded` now means the form defaults.
 
 ### Fixed
 - CI: `phpunit/phpunit` is required as `^9.6` instead of the exact version 9.6.0, which Composer blocks because of a

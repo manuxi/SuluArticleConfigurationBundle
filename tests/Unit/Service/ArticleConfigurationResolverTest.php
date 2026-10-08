@@ -6,9 +6,8 @@ namespace Manuxi\SuluArticleConfigurationBundle\Tests\Unit\Service;
 
 use Manuxi\SuluArticleConfigurationBundle\Entity\ArticleConfiguration;
 use Manuxi\SuluArticleConfigurationBundle\Repository\ArticleConfigurationRepository;
-use Manuxi\SuluArticleConfigurationBundle\Schema\ConfigurationSchema;
+use Manuxi\SuluArticleConfigurationBundle\Tests\Support\TestSchemaFactory;
 use Manuxi\SuluArticleConfigurationBundle\Service\ArticleConfigurationResolver;
-use Manuxi\SuluArticleConfigurationBundle\Service\ArticleGroupProvider;
 use PHPUnit\Framework\TestCase;
 
 class ArticleConfigurationResolverTest extends TestCase
@@ -19,12 +18,7 @@ class ArticleConfigurationResolverTest extends TestCase
     protected function setUp(): void
     {
         $this->repository = $this->createMock(ArticleConfigurationRepository::class);
-        $groupProvider = $this->createMock(ArticleGroupProvider::class);
-        $groupProvider->method('getGroupIdentifier')->willReturn('default');
-
-        $this->resolver = new ArticleConfigurationResolver($this->repository, new ConfigurationSchema([
-            'templates' => ['article_blog' => ['fields' => ['showToc' => false, 'heroVariant' => ['type' => 'single_select', 'values' => ['image', 'video']]]]],
-        ], $groupProvider));
+        $this->resolver = new ArticleConfigurationResolver($this->repository, TestSchemaFactory::createSchema());
     }
 
     public function testResolveWithArticleConfig(): void
@@ -124,15 +118,15 @@ class ArticleConfigurationResolverTest extends TestCase
     {
         $config = new ArticleConfiguration();
         $config->setArticleId('article-123');
-        $config->setTemplateKey('article_blog');
+        $config->setTemplateKey(TestSchemaFactory::BLOG_TEMPLATE);
         $config->setData(['layoutStyle' => 'wide', 'showToc' => true, 'obsoleteKey' => 'x']);
 
         $this->repository->method('findByArticleId')->willReturn($config);
 
-        $result = $this->resolver->resolve('article-123', 'article_blog');
+        $result = $this->resolver->resolve('article-123', TestSchemaFactory::BLOG_TEMPLATE);
 
         $this->assertSame('wide', $result['layoutStyle']);
-        $this->assertSame('image', $result['heroVariant']);
+        $this->assertSame('video', $result['heroVariant']);
         $this->assertTrue($result['showRelated']);
         $this->assertArrayNotHasKey('showToc', $result);
         $this->assertArrayNotHasKey('obsoleteKey', $result);
@@ -143,10 +137,10 @@ class ArticleConfigurationResolverTest extends TestCase
         $this->repository->method('findByArticleId')->willReturn(null);
         $this->repository->method('findDefaultForTemplate')->willReturn(null);
 
-        $result = $this->resolver->resolve('article-123', 'article_blog');
+        $result = $this->resolver->resolve('article-123', TestSchemaFactory::BLOG_TEMPLATE);
 
         $this->assertArrayNotHasKey('showToc', $result);
-        $this->assertSame('image', $result['heroVariant']);
+        $this->assertSame('video', $result['heroVariant']);
         $this->assertFalse($result['default']);
     }
 
