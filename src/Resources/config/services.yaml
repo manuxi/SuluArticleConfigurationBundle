@@ -24,7 +24,8 @@ services:
         arguments:
             - '@Manuxi\SuluArticleConfigurationBundle\Admin\FormMetadata\ArticleConfigurationFormComposer'
         tags:
-            - { name: 'sulu_admin.form_metadata_loader' }
+            # Must run before Sulu's XML loader, which knows the raw template file under the same key
+            - { name: 'sulu_admin.form_metadata_loader', priority: 1024 }
 
     Manuxi\SuluArticleConfigurationBundle\Schema\ConfigurationSchema:
         arguments:

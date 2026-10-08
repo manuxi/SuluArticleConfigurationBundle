@@ -47,6 +47,9 @@
   `getFlatFieldMetadata()`/`findOption()` are replaced by `MetadataReader`, which only uses long-standing getters.
   Before the fix the "Configuration" tab and `article_config()` failed with "Call to undefined method
   FieldMetadata::hasTag()".
+- The "Configuration" tab of a template with its own XML file showed only that file instead of the composed form
+  (base and group fields missing, the remove tag without effect): in Sulu releases where Sulu's XML form loader has
+  the same priority as the bundle loader, it answered first. The bundle loader is now tagged with priority 1024.
 - The dry run of the migration command says "Would add column" instead of "Adding column".
 - CI runs the suite against Sulu 3.0.0 and the latest 3.0 release (matrix in both workflows); the suite was also run
   against 3.0.3 and 3.0.10.
