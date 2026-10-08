@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Manuxi\SuluArticleConfigurationBundle\Admin\FormMetadata;
 
+use Manuxi\SuluArticleConfigurationBundle\Schema\MetadataReader;
 use Manuxi\SuluArticleConfigurationBundle\Service\ArticleGroupProvider;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FieldMetadata;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FormMetadata;
@@ -82,8 +83,8 @@ class ArticleConfigurationFormComposer
      */
     private function applyLevel(array &$nodes, FormMetadata $level): void
     {
-        foreach ($level->getFlatFieldMetadata() as $field) {
-            if ($field->hasTag(self::REMOVE_TAG)) {
+        foreach (MetadataReader::flattenFields($level->getItems()) as $field) {
+            if (MetadataReader::hasTag($field, self::REMOVE_TAG)) {
                 $this->removeField($nodes, $field->getName());
             }
         }
@@ -115,7 +116,7 @@ class ArticleConfigurationFormComposer
                 continue;
             }
 
-            if (!$item instanceof FieldMetadata || $item->hasTag(self::REMOVE_TAG)) {
+            if (!$item instanceof FieldMetadata || MetadataReader::hasTag($item, self::REMOVE_TAG)) {
                 continue;
             }
 

@@ -267,11 +267,13 @@ keine Meinung zu Farben oder Bezeichnungen.
 
 ## ⬆️ Umstieg von 2.x
 
-3.0 speichert die Werte als JSON statt in festen Spalten. Die Daten **vor** dem Schema-Update kopieren:
+3.0 speichert die Werte als JSON statt in festen Spalten. Datenbank-Backup anlegen, dann die Daten kopieren, **bevor**
+die alten Spalten entfernt werden:
 
 ```bash
-php bin/console sulu:article-configuration:migrate-to-json
-php bin/console doctrine:schema:update --force
+php bin/adminconsole sulu:article-configuration:migrate-to-json --dry-run
+php bin/adminconsole sulu:article-configuration:migrate-to-json
+php bin/adminconsole sulu:article-configuration:migrate-to-json --drop-legacy-columns
 ```
 
 Details und die Liste der Breaking Changes: [docs/configuration.de.md](docs/configuration.de.md) und [CHANGELOG.md](CHANGELOG.md).

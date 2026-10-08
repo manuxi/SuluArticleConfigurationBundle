@@ -37,7 +37,7 @@ class ConfigurationSchema
         }
 
         $fields = [];
-        foreach ($this->composer->compose($templateKey)->getFlatFieldMetadata() as $name => $field) {
+        foreach (MetadataReader::flattenFields($this->composer->compose($templateKey)->getItems()) as $name => $field) {
             if (self::RESERVED_FIELD === $name) {
                 continue;
             }

@@ -265,11 +265,13 @@ by their template in a list -- the bundle only resolves the key, it has no opini
 
 ## ⬆️ Upgrading from 2.x
 
-3.0 stores the values as JSON instead of fixed columns. Copy the data **before** updating the schema:
+3.0 stores the values as JSON instead of fixed columns. Make a database backup, then copy the data **before** the old
+columns are dropped:
 
 ```bash
-php bin/console sulu:article-configuration:migrate-to-json
-php bin/console doctrine:schema:update --force
+php bin/adminconsole sulu:article-configuration:migrate-to-json --dry-run
+php bin/adminconsole sulu:article-configuration:migrate-to-json
+php bin/adminconsole sulu:article-configuration:migrate-to-json --drop-legacy-columns
 ```
 
 Details and the list of breaking changes: [docs/configuration.en.md](docs/configuration.en.md) and [CHANGELOG.md](CHANGELOG.md).

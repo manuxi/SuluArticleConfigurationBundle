@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Manuxi\SuluArticleConfigurationBundle\Tests\Unit\Admin\FormMetadata;
 
 use Manuxi\SuluArticleConfigurationBundle\Admin\FormMetadata\ArticleConfigurationFormComposer;
+use Manuxi\SuluArticleConfigurationBundle\Schema\MetadataReader;
 use Manuxi\SuluArticleConfigurationBundle\Service\ArticleGroupProvider;
 use Manuxi\SuluArticleConfigurationBundle\Tests\Support\TestSchemaFactory;
 use PHPUnit\Framework\TestCase;
@@ -90,7 +91,7 @@ class ArticleConfigurationFormComposerTest extends TestCase
      */
     private function fieldNames(FormMetadata $form): array
     {
-        return \array_keys($form->getFlatFieldMetadata());
+        return \array_keys(MetadataReader::flattenFields($form->getItems()));
     }
 
     public function testBaseOnlyWithoutTemplate(): void
@@ -187,7 +188,7 @@ class ArticleConfigurationFormComposerTest extends TestCase
         $form = $composer->compose('blog_post');
 
         $this->assertSame(['a'], $this->fieldNames($form));
-        $this->assertSame('text_line', $form->getFlatFieldMetadata()['a']->getType());
+        $this->assertSame('text_line', MetadataReader::flattenFields($form->getItems())['a']->getType());
     }
 
     public function testSectionWithOnlyRemovedFieldsDisappears(): void

@@ -41,7 +41,7 @@ final class TestSchemaFactory
             self::createSchemaMetadataProvider()
         );
 
-        return new XmlFormMetadataLoader(
+        $loader = new XmlFormMetadataLoader(
             $formLoader,
             new ChainFieldMetadataValidator([]),
             [
@@ -51,6 +51,11 @@ final class TestSchemaFactory
             self::getCacheDirectory(),
             true
         );
+
+        /* Sulu 3.0.0 only reads forms that the cache warmer has written, later releases warm up on demand. */
+        $loader->warmUp(self::getCacheDirectory());
+
+        return $loader;
     }
 
     public static function createSchemaMetadataProvider(): SchemaMetadataProvider

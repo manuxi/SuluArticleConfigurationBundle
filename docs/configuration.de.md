@@ -136,16 +136,22 @@ später entfernten Feldern werden ignoriert, später hinzugekommene Felder mit i
 
 ## Umstieg von 2.x
 
-3.0 verschiebt die Werte aus festen Spalten in die JSON-Spalte `data`. Die Daten-Migration **vor** dem
-Schema-Update ausführen, sonst gehen die alten Werte verloren:
+3.0 verschiebt die Werte aus festen Spalten in die JSON-Spalte `data`. Die Daten kopieren, **bevor** die alten
+Spalten entfernt werden, sonst gehen die alten Werte verloren. Vorher ein Datenbank-Backup anlegen.
 
 ```bash
 php bin/adminconsole sulu:article-configuration:migrate-to-json --dry-run
 php bin/adminconsole sulu:article-configuration:migrate-to-json
-php bin/adminconsole doctrine:schema:update --force
+php bin/adminconsole sulu:article-configuration:migrate-to-json --drop-legacy-columns
 ```
 
-Der Befehl legt die Spalte `data` an, kopiert die alten Spalten hinein und kann beliebig oft ausgeführt werden. Das
-anschließende Schema-Update entfernt die alten Spalten. Twig-API und Namen der Standardfelder bleiben gleich. Der
-frühere Spalten-Default von `layoutStyle` (`default`) entfällt, neue Artikel verwenden den Standard des Formulars
-(`fullwidth`).
+- Der Befehl legt die Spalte `data` an und kopiert die alten Spalten hinein. Er kann beliebig oft ausgeführt werden:
+  Werte, die schon in `data` stehen, werden nie überschrieben, es werden nur fehlende Keys ergänzt.
+- Spalten älterer Bundle-Versionen, die diese Version nicht mehr kennt (z. B. `custom_data`), werden pro Zeile unter
+  ihrem camelCase-Namen (`customData`) in `data` kopiert und mit der Zahl der Zeilen mit Wert gemeldet. Der Key bleibt
+  in `data`, bis der Artikel das nächste Mal gespeichert wird, außer du definierst ein Feld dieses Namens in deinem XML.
+- `--drop-legacy-columns` entfernt nach dem Kopieren die alten Spalten von `ar_article_configuration` und fragt vorher
+  nach (`--force` überspringt die Frage). Das ist die Alternative zu `doctrine:schema:update --force`, das auch alle
+  anderen offenen Schema-Änderungen deines Projekts ausführen würde. Mit `--dry-run` wird nur aufgelistet.
+- Twig-API und Namen der Standardfelder bleiben gleich. Der frühere Spalten-Default von `layoutStyle` (`default`)
+  entfällt, neue Artikel verwenden den Standard des Formulars (`fullwidth`).

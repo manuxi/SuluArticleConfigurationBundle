@@ -14,23 +14,35 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false
+      matrix:
+        sulu: [ '3.0.0', '^3.0' ]
+
+    env:
+      # Sulu 3.0.0 to 3.0.7 have published advisories; only the oldest-release leg installs them on purpose
+      COMPOSER_NO_SECURITY_BLOCKING: ${{ matrix.sulu == '^3.0' && '0' || '1' }}
+
     steps:
     - uses: actions/checkout@v4
 
     - name: Validate composer.json and composer.lock
       run: composer validate --strict
 
+    - name: Select the Sulu version
+      run: composer require "sulu/sulu:${{ matrix.sulu }}" --no-update
+
     - name: Cache Composer packages
       id: composer-cache
       uses: actions/cache@v3
       with:
         path: vendor
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        key: ${{ runner.os }}-php-${{ matrix.sulu }}-${{ hashFiles('**/composer.json') }}
         restore-keys: |
-          ${{ runner.os }}-php-
+          ${{ runner.os }}-php-${{ matrix.sulu }}-
 
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
+      run: composer update --prefer-dist --no-progress
 
     - name: Run test suite
       run: composer run-script test

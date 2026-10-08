@@ -36,7 +36,7 @@ final class FieldDefinition
     {
         $kind = self::resolveKind($field->getType());
         $values = self::readValues($field);
-        $defaultOption = $field->findOption('default_value')?->getValue();
+        $defaultOption = MetadataReader::findOption($field, 'default_value')?->getValue();
         $defaultOption = \is_scalar($defaultOption) ? (string) $defaultOption : null;
 
         $definition = new self($field->getName(), $kind, null, $values);
@@ -99,7 +99,7 @@ final class FieldDefinition
      */
     private static function readValues(FieldMetadata $field): array
     {
-        $option = $field->findOption('values');
+        $option = MetadataReader::findOption($field, 'values');
         if (null === $option || !\is_array($option->getValue())) {
             return [];
         }

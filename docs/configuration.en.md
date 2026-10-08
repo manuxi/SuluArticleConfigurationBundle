@@ -135,15 +135,22 @@ that were removed later are ignored and fields added later are filled with their
 
 ## Upgrading from 2.x
 
-3.0 moves the values from fixed columns into the JSON column `data`. Run the data migration **before** the schema
-update, otherwise the old values are lost:
+3.0 moves the values from fixed columns into the JSON column `data`. Copy the data **before** the old columns are
+dropped, otherwise the old values are lost. Make a database backup first.
 
 ```bash
 php bin/adminconsole sulu:article-configuration:migrate-to-json --dry-run
 php bin/adminconsole sulu:article-configuration:migrate-to-json
-php bin/adminconsole doctrine:schema:update --force
+php bin/adminconsole sulu:article-configuration:migrate-to-json --drop-legacy-columns
 ```
 
-The command adds the column `data`, copies the old columns into it and can be run repeatedly. The schema update
-afterwards drops the old columns. The Twig API and the names of the standard fields are unchanged, the former column
-default of `layoutStyle` (`default`) no longer exists, new articles use the default of the form (`fullwidth`).
+- The command adds the column `data` and copies the old columns into it. It can be run repeatedly: values already
+  stored in `data` are never overwritten, only missing keys are filled.
+- Columns of older bundle versions that this version does not know any more (e.g. `custom_data`) are copied to the
+  `data` of each row under their camelCase name (`customData`) and reported with the number of rows that have a
+  value. The key stays in `data` until the article is saved again, unless you define a field of that name in your XML.
+- `--drop-legacy-columns` drops the old columns of `ar_article_configuration` after copying, it asks for confirmation
+  (`--force` skips the question). Use it instead of `doctrine:schema:update --force`, which would also apply every
+  other pending schema change of your project. `--dry-run` only lists what would happen.
+- The Twig API and the names of the standard fields are unchanged. The former column default of `layoutStyle`
+  (`default`) no longer exists, new articles use the default of the form (`fullwidth`).

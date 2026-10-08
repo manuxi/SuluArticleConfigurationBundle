@@ -6,8 +6,8 @@
 - The values of an article are stored as JSON in the new column `data` of `ar_article_configuration`. The columns
   `layout_style`, `enable_sidebar`, `sidebar_position`, `show_toc`, `show_reading_time`, `show_author_box`,
   `show_related`, `enable_share_buttons`, `enable_print`, `hide_publish_date` and `custom_css_class` are dropped. Run
-  `sulu:article-configuration:migrate-to-json` before `doctrine:schema:update --force`, see
-  [docs/configuration.en.md](docs/configuration.en.md).
+  `sulu:article-configuration:migrate-to-json --drop-legacy-columns` (or the command without the option before
+  `doctrine:schema:update --force`), see [docs/configuration.en.md](docs/configuration.en.md).
 - The admin form key `article_configuration` is no longer loaded by the tab. Each template gets its own composed form
   `article_configuration_template_<templateKey>`; `article_configuration` is now the base level of that composition.
 - `ArticleConfigurationAdmin` takes `ArticleGroupProvider` instead of `GroupProviderInterface`.
@@ -28,7 +28,13 @@
   `media_selection`) stored as delivered. Values from the admin are validated against it.
 - `ArticleGroupProvider` resolves the article group of a template and keeps the `getGroups` compatibility for Sulu
   before and after 3.0.9.
-- Console command `sulu:article-configuration:migrate-to-json` with `--dry-run`.
+- Console command `sulu:article-configuration:migrate-to-json`:
+  - `--dry-run` only reports.
+  - Repeatable: values already stored in `data` win, only missing keys are filled from the old columns.
+  - Columns unknown to this version (e.g. `custom_data` of older bundle versions) are copied to `data` under their camelCase
+    name and reported with the number of rows that have a value.
+  - `--drop-legacy-columns` drops the old columns afterwards (asks first, `--force` skips the question), so no
+    project-wide `doctrine:schema:update --force` is needed for this table.
 - Documentation: `docs/configuration.en.md`, `docs/configuration.de.md`.
 
 ### Changed
@@ -37,6 +43,13 @@
   template; missing values are filled with the form default. `configSource: hardcoded` now means the form defaults.
 
 ### Fixed
+- Compatibility with all Sulu 3.0 releases: `FieldMetadata::hasTag()` (missing in Sulu 3.0.3) and the internal
+  `getFlatFieldMetadata()`/`findOption()` are replaced by `MetadataReader`, which only uses long-standing getters.
+  Before the fix the "Configuration" tab and `article_config()` failed with "Call to undefined method
+  FieldMetadata::hasTag()".
+- The dry run of the migration command says "Would add column" instead of "Adding column".
+- CI runs the suite against Sulu 3.0.0 and the latest 3.0 release (matrix in both workflows); the suite was also run
+  against 3.0.3 and 3.0.10.
 - CI: `phpunit/phpunit` is required as `^9.6` instead of the exact version 9.6.0, which Composer blocks because of a
   security advisory; the test step of the PHP workflow is enabled.
 
