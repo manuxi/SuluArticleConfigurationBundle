@@ -147,8 +147,9 @@ php bin/adminconsole sulu:article-configuration:migrate-to-json --drop-legacy-co
 - The command adds the column `data` and copies the old columns into it. It can be run repeatedly: values already
   stored in `data` are never overwritten, only missing keys are filled.
 - Columns of older bundle versions that this version does not know any more (e.g. `custom_data`) are copied to the
-  `data` of each row under their camelCase name (`customData`) and reported with the number of rows that have a
-  value. The key stays in `data` until the article is saved again, unless you define a field of that name in your XML.
+  `data` of each row under their camelCase name (`customData`) and reported with the number of rows that hold a value
+  other than the column default. NULL and default values are not copied. The key stays in `data` until the article is
+  saved again, unless you define a field of that name in your XML.
 - `--drop-legacy-columns` drops the old columns of `ar_article_configuration` after copying, it asks for confirmation
   (`--force` skips the question). Use it instead of `doctrine:schema:update --force`, which would also apply every
   other pending schema change of your project. `--dry-run` only lists what would happen.

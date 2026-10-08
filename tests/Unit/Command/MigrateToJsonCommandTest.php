@@ -153,8 +153,39 @@ class MigrateToJsonCommandTest extends TestCase
 
         $display = (string) \preg_replace('/\s+/', ' ', $this->tester->getDisplay());
         $this->assertStringContainsString('Column "custom_data"', $display);
-        $this->assertStringContainsString('2 row(s) have a value', $display);
+        $this->assertStringContainsString('2 row(s) with a non-default value', $display);
+        $this->assertStringContainsString('Column "is_featured" is not used by this bundle any more. 1 row(s)', $display);
         $this->assertStringContainsString('"customData"', $display);
+    }
+
+    public function testDefaultValuesOfUnknownColumnsAreNeitherCopiedNorCounted(): void
+    {
+        $this->createLegacyTable();
+        $this->connection->executeStatement('ALTER TABLE ar_article_configuration ADD is_sticky BOOLEAN DEFAULT 0 NOT NULL');
+        $this->connection->executeStatement("ALTER TABLE ar_article_configuration ADD header_text_color VARCHAR(16) DEFAULT '#000' NOT NULL");
+        $this->connection->executeStatement('ALTER TABLE ar_article_configuration ADD cache_lifetime INTEGER DEFAULT 0 NOT NULL');
+        $this->connection->executeStatement("INSERT INTO ar_article_configuration (article_id) VALUES ('a-1')");
+        $this->connection->executeStatement("INSERT INTO ar_article_configuration (article_id, is_sticky, header_text_color) VALUES ('a-2', 1, '#fff')");
+        $this->connection->executeStatement("INSERT INTO ar_article_configuration (article_id) VALUES ('a-3')");
+
+        $this->tester->execute([]);
+
+        foreach ([1, 3] as $id) {
+            $data = $this->fetchData($id);
+            $this->assertArrayNotHasKey('isSticky', $data);
+            $this->assertArrayNotHasKey('headerTextColor', $data);
+            $this->assertArrayNotHasKey('cacheLifetime', $data);
+        }
+
+        $changed = $this->fetchData(2);
+        $this->assertTrue($changed['isSticky']);
+        $this->assertSame('#fff', $changed['headerTextColor']);
+        $this->assertArrayNotHasKey('cacheLifetime', $changed);
+
+        $display = (string) \preg_replace('/\s+/', ' ', $this->tester->getDisplay());
+        $this->assertStringContainsString('Column "is_sticky" is not used by this bundle any more. 1 row(s) with a non-default value', $display);
+        $this->assertStringContainsString('Column "header_text_color" is not used by this bundle any more. 1 row(s)', $display);
+        $this->assertStringContainsString('Column "cache_lifetime" holds only NULL or its default value, nothing copied.', $display);
     }
 
     public function testRepeatedRunAddsUnknownColumnsToRowsMigratedBefore(): void

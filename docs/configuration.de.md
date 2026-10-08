@@ -148,8 +148,9 @@ php bin/adminconsole sulu:article-configuration:migrate-to-json --drop-legacy-co
 - Der Befehl legt die Spalte `data` an und kopiert die alten Spalten hinein. Er kann beliebig oft ausgeführt werden:
   Werte, die schon in `data` stehen, werden nie überschrieben, es werden nur fehlende Keys ergänzt.
 - Spalten älterer Bundle-Versionen, die diese Version nicht mehr kennt (z. B. `custom_data`), werden pro Zeile unter
-  ihrem camelCase-Namen (`customData`) in `data` kopiert und mit der Zahl der Zeilen mit Wert gemeldet. Der Key bleibt
-  in `data`, bis der Artikel das nächste Mal gespeichert wird, außer du definierst ein Feld dieses Namens in deinem XML.
+  ihrem camelCase-Namen (`customData`) in `data` kopiert und mit der Zahl der Zeilen gemeldet, deren Wert vom
+  Spalten-Default abweicht. NULL- und Default-Werte werden nicht kopiert. Der Key bleibt in `data`, bis der Artikel das
+  nächste Mal gespeichert wird, außer du definierst ein Feld dieses Namens in deinem XML.
 - `--drop-legacy-columns` entfernt nach dem Kopieren die alten Spalten von `ar_article_configuration` und fragt vorher
   nach (`--force` überspringt die Frage). Das ist die Alternative zu `doctrine:schema:update --force`, das auch alle
   anderen offenen Schema-Änderungen deines Projekts ausführen würde. Mit `--dry-run` wird nur aufgelistet.

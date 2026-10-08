@@ -32,7 +32,8 @@
   - `--dry-run` only reports.
   - Repeatable: values already stored in `data` win, only missing keys are filled from the old columns.
   - Columns unknown to this version (e.g. `custom_data` of older bundle versions) are copied to `data` under their camelCase
-    name and reported with the number of rows that have a value.
+    name and reported with the number of rows that hold a value other than the column default; NULL and default values
+    are not copied.
   - `--drop-legacy-columns` drops the old columns afterwards (asks first, `--force` skips the question), so no
     project-wide `doctrine:schema:update --force` is needed for this table.
 - Documentation: `docs/configuration.en.md`, `docs/configuration.de.md`.

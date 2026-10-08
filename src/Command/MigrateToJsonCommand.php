@@ -131,6 +131,12 @@ class MigrateToJsonCommand extends Command
         ));
 
         $extraCounts = \array_fill_keys($extraColumns, 0);
+        $extraDefaults = [];
+        foreach ($extraColumns as $column) {
+            $default = $columns[$column]->getDefault();
+            $extraDefaults[$column] = null === $default ? null : $this->convertExtraValue($default, $columns[$column]);
+        }
+
         $migrated = 0;
         foreach ($rows as $row) {
             $values = [];
@@ -147,8 +153,14 @@ class MigrateToJsonCommand extends Command
                     continue;
                 }
 
+                /* A value equal to the column default was never set on purpose, so it is not worth keeping. */
+                $value = $this->convertExtraValue($row[$column], $columns[$column]);
+                if (null !== $extraDefaults[$column] && $value === $extraDefaults[$column]) {
+                    continue;
+                }
+
                 ++$extraCounts[$column];
-                $values[self::toCamelCase($column)] = $this->convertExtraValue($row[$column], $columns[$column]);
+                $values[self::toCamelCase($column)] = $value;
             }
 
             $existing = $hasDataColumn ? $this->decodeJson($row['data'] ?? null) : [];
@@ -168,8 +180,14 @@ class MigrateToJsonCommand extends Command
         }
 
         foreach ($extraColumns as $column) {
+            if (0 === $extraCounts[$column]) {
+                $io->text(\sprintf('Column "%s" holds only NULL or its default value, nothing copied.', $column));
+
+                continue;
+            }
+
             $io->warning(\sprintf(
-                'Column "%s" is not used by this bundle any more. %d row(s) have a value, it is copied to the key "%s" of "data". '
+                'Column "%s" is not used by this bundle any more. %d row(s) with a non-default value, copied to the key "%s" of "data". '
                 . 'The key stays there until the article is saved again, unless you define a field of that name in your XML form.',
                 $column,
                 $extraCounts[$column],
