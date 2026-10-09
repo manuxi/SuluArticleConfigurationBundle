@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<form xmlns="http://schemas.sulu.io/template/template"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://schemas.sulu.io/template/template http://schemas.sulu.io/template/form-1.0.xsd"
+>
+    <key>article_configuration_template_blog_post</key>
+    <properties>
+        <section name="display_options">
+            <properties>
+                <property name="showToc" type="checkbox">
+                    <tag name="article_configuration.remove"/>
+                </property>
+                <property name="layoutStyle" type="single_select" colspan="6">
+                    <params>
+                        <param name="default_value" value="narrow"/>
+                        <param name="values" type="collection">
+                            <param name="narrow"/>
+                            <param name="wide"/>
+                        </param>
+                    </params>
+                </property>
+            </properties>
+        </section>
+        <section name="more">
+            <properties>
+                <property name="readingSpeed" type="number">
+                    <params>
+                        <param name="default_value" value="200"/>
+                    </params>
+                </property>
+                <property name="gallery" type="media_selection"/>
+            </properties>
+        </section>
+    </properties>
+</form>

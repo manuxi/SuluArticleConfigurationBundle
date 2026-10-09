@@ -29,6 +29,10 @@ It allows managing additional display options, features, and publication setting
 ### 🎨 Styling & Advanced
 - **Design** - Custom CSS classes
 
+### 🧩 Configurable Fields
+- **Sulu form XML** - Add, change or remove fields with plain Sulu form XML in your project, no database change needed
+- **Per group and per template** - Every template can have its own set of fields, see [docs/configuration.en.md](docs/configuration.en.md)
+
 ### 🔄 Default-Configuration
 - **Inheritance System** - Set a configuration as default for all articles of the same template key
 - **3-Tier Cascade** - Article-specific → Template key specific → default values
@@ -109,6 +113,34 @@ Now all other articles with this template will automatically use these settings 
 3. Neither? → Use default values
 ```
 
+### Custom Fields
+
+The fields of the "Configuration" tab are defined with Sulu form XML. The bundle ships the fields listed below; your
+project can change them or add its own - for all articles, per article group or per template. Drop the files into
+`config/article_configuration/` (registered automatically):
+
+```
+config/article_configuration/
+    group_blog.xml            <key>article_configuration_group_blog</key>
+    template_blog_post.xml    <key>article_configuration_template_blog_post</key>
+```
+
+The files only contain the differences to the level before. A new `<property>` adds a field, a property with the
+same name replaces it, and `<tag name="article_configuration.remove"/>` removes it:
+
+```xml
+<section name="display_options">
+    <properties>
+        <property name="showToc" type="checkbox">
+            <tag name="article_configuration.remove"/>
+        </property>
+    </properties>
+</section>
+```
+
+Values are stored as JSON, so a new field never needs a schema update. See [docs/configuration.en.md](docs/configuration.en.md)
+for the levels, value types, translations and a complete example.
+
 ### Frontend Usage (Twig)
 
 The bundle provides a Twig function to access the resolved configuration in your twig templates:
@@ -163,7 +195,7 @@ The bundle provides a Twig function to access the resolved configuration in your
 {% endif %}
 ```
 
-**Available configuration values:**
+**Available configuration values** (the fields shipped with the bundle; your schema may add or remove fields, and `hardcoded` means the schema defaults):
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
@@ -231,6 +263,19 @@ so it works from exactly that situation. Returns `null` if the URL does not reso
 Combine with your own template-to-color/label mapping (e.g. a project-level color palette) to badge articles
 by their template in a list -- the bundle only resolves the key, it has no opinion on colors or labels.
 
+## ⬆️ Upgrading from 2.x
+
+3.0 stores the values as JSON instead of fixed columns. Make a database backup, then copy the data **before** the old
+columns are dropped:
+
+```bash
+php bin/adminconsole sulu:article-configuration:migrate-to-json --dry-run
+php bin/adminconsole sulu:article-configuration:migrate-to-json
+php bin/adminconsole sulu:article-configuration:migrate-to-json --drop-legacy-columns
+```
+
+Details and the list of breaking changes: [docs/configuration.en.md](docs/configuration.en.md) and [CHANGELOG.md](CHANGELOG.md).
+
 ## ⬆️ Upgrading from 1.x
 
 2.0 removes the PDF switches (`enableDownloadPdf`, `pdfShowCaptions`, `pdfShowAuthor`, `pdfShowModified`, `pdfShowOnlineLink`, `pdfCompanyData`) from the "Configuration" tab. They now live in the **excerpt tab** of the article, provided by [manuxi/sulu-pdf-bundle](https://github.com/manuxi/SuluPdfBundle) (1.3+) - per language and with the draft/publish workflow:
@@ -253,17 +298,7 @@ CREATE TABLE ar_article_configuration (
     article_id VARCHAR(36) UNIQUE NOT NULL,
     template_key VARCHAR(128) DEFAULT NULL,
     is_default TINYINT(1) DEFAULT 0 NOT NULL,
-    layout_style VARCHAR(32) DEFAULT 'default' NOT NULL,
-    enable_sidebar TINYINT(1) DEFAULT 1 NOT NULL,
-    sidebar_position VARCHAR(16) DEFAULT 'right' NOT NULL,
-    show_toc TINYINT(1) DEFAULT 1 NOT NULL,
-    show_reading_time TINYINT(1) DEFAULT 1 NOT NULL,
-    show_author_box TINYINT(1) DEFAULT 1 NOT NULL,
-    show_related TINYINT(1) DEFAULT 1 NOT NULL,
-    enable_share_buttons TINYINT(1) DEFAULT 1 NOT NULL,
-    enable_print TINYINT(1) DEFAULT 1 NOT NULL,
-    hide_publish_date TINYINT(1) DEFAULT 0 NOT NULL,
-    custom_css_class VARCHAR(128) DEFAULT NULL,
+    data JSON DEFAULT NULL,
     INDEX idx_template_default (template_key, is_default)
 );
 ```

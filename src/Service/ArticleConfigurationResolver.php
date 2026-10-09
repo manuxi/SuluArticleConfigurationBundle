@@ -6,11 +6,13 @@ namespace Manuxi\SuluArticleConfigurationBundle\Service;
 
 use Manuxi\SuluArticleConfigurationBundle\Entity\ArticleConfiguration;
 use Manuxi\SuluArticleConfigurationBundle\Repository\ArticleConfigurationRepository;
+use Manuxi\SuluArticleConfigurationBundle\Schema\ConfigurationSchema;
 
 class ArticleConfigurationResolver
 {
     public function __construct(
         private ArticleConfigurationRepository $repository,
+        private ConfigurationSchema $schema,
     ) {
     }
 
@@ -18,30 +20,36 @@ class ArticleConfigurationResolver
      * Resolve configuration with fallback chain:
      * 1. Article-specific config (if exists)
      * 2. Template default (default=true for this templateKey)
-     * 3. Hardcoded defaults
+     * 3. Defaults of the configured schema
+     *
+     * @return array<string, mixed>
      */
     public function resolve(string $articleId, ?string $templateKey = null): array
     {
         $articleConfig = $this->repository->findByArticleId($articleId);
         if ($articleConfig) {
-            $result = $this->entityToArray($articleConfig);
+            $result = $this->entityToArray($articleConfig, $templateKey);
             $result['configSource'] = 'article';
+
             return $result;
         }
 
         if ($templateKey) {
             $templateDefault = $this->repository->findDefaultForTemplate($templateKey);
             if ($templateDefault) {
-                $result = $this->entityToArray($templateDefault);
+                $result = $this->entityToArray($templateDefault, $templateKey);
                 $result['configSource'] = 'template_default';
                 $result['templateDefaultArticleId'] = $templateDefault->getArticleId();
+
                 return $result;
             }
         }
 
-        $result = $this->getHardcodedDefaults();
-        $result['configSource'] = 'hardcoded';
+        $result = $this->schema->getDefaults($templateKey);
+        $result['default'] = false;
         $result['templateKey'] = $templateKey;
+        $result['configSource'] = 'hardcoded';
+
         return $result;
     }
 
@@ -55,42 +63,20 @@ class ArticleConfigurationResolver
         return $this->repository->findDefaultForTemplate($templateKey);
     }
 
-    private function getHardcodedDefaults(): array
+    /**
+     * @return array<string, mixed>
+     */
+    private function entityToArray(ArticleConfiguration $entity, ?string $templateKey): array
     {
-        return [
-            'layoutStyle' => 'fullwidth',
-            'showToc' => true,
-            'showReadingTime' => true,
-            'showAuthorBox' => true,
-            'showRelated' => true,
-            'enableSidebar' => true,
-            'sidebarPosition' => 'right',
-            'enableShareButtons' => true,
-            'enablePrint' => true,
-            'hidePublishDate' => false,
-            'customCssClass' => null,
-            'default' => false,
-            'templateKey' => null,
-        ];
-    }
+        $schemaTemplateKey = $templateKey ?? $entity->getTemplateKey();
 
-    private function entityToArray(ArticleConfiguration $entity): array
-    {
-        return [
-            'articleId' => $entity->getArticleId(),
-            'templateKey' => $entity->getTemplateKey(),
-            'default' => $entity->isDefault(),
-            'layoutStyle' => $entity->getLayoutStyle(),
-            'showToc' => $entity->isShowToc(),
-            'showReadingTime' => $entity->isShowReadingTime(),
-            'showAuthorBox' => $entity->isShowAuthorBox(),
-            'showRelated' => $entity->isShowRelated(),
-            'enableSidebar' => $entity->isEnableSidebar(),
-            'sidebarPosition' => $entity->getSidebarPosition(),
-            'enableShareButtons' => $entity->isEnableShareButtons(),
-            'enablePrint' => $entity->isEnablePrint(),
-            'hidePublishDate' => $entity->isHidePublishDate(),
-            'customCssClass' => $entity->getCustomCssClass(),
-        ];
+        return \array_merge(
+            [
+                'articleId' => $entity->getArticleId(),
+                'templateKey' => $entity->getTemplateKey(),
+                'default' => $entity->isDefault(),
+            ],
+            $this->schema->sanitize($schemaTemplateKey, $entity->getData())
+        );
     }
 }

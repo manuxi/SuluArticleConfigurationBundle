@@ -10,6 +10,7 @@ use FOS\RestBundle\View\ViewHandlerInterface;
 use Manuxi\SuluArticleConfigurationBundle\Controller\Admin\ArticleConfigurationController;
 use Manuxi\SuluArticleConfigurationBundle\Entity\ArticleConfiguration;
 use Manuxi\SuluArticleConfigurationBundle\Repository\ArticleConfigurationRepository;
+use Manuxi\SuluArticleConfigurationBundle\Tests\Support\TestSchemaFactory;
 use PHPUnit\Framework\TestCase;
 use Sulu\Article\Domain\Model\ArticleDimensionContentInterface;
 use Sulu\Article\Domain\Model\ArticleInterface;
@@ -40,6 +41,7 @@ class ArticleConfigurationControllerTest extends TestCase
             $this->entityManager,
             $this->articleRepository,
             $this->contentAggregator,
+            TestSchemaFactory::createSchema(),
             $this->viewHandler
         );
     }
@@ -69,7 +71,7 @@ class ArticleConfigurationControllerTest extends TestCase
         $configuration->setArticleId($articleId);
         $configuration->setTemplateKey($templateKey);
         $configuration->setDefault(true);
-        $configuration->setLayoutStyle('wide');
+        $configuration->setData(['layoutStyle' => 'wide']);
 
         $this->repository->expects($this->once())
             ->method('findByArticleId')
@@ -295,5 +297,95 @@ class ArticleConfigurationControllerTest extends TestCase
 
         $request = new Request();
         $this->controller->getAction($articleId, $request);
+    }
+
+    public function testPutActionStoresSanitizedDataFromSchema(): void
+    {
+        $articleId = '123-456';
+        $this->mockArticleWithTemplateKey(TestSchemaFactory::BLOG_TEMPLATE);
+
+        $configuration = new ArticleConfiguration();
+        $configuration->setArticleId($articleId);
+        $this->repository->method('findByArticleId')->willReturn($configuration);
+        $this->viewHandler->method('handle')->willReturn(new Response());
+
+        $request = new Request([], [], [], [], [], [], json_encode([
+            'layoutStyle' => 'fullwidth',
+            'showToc' => false,
+            'showRelated' => false,
+            'readingSpeed' => '300',
+            'customCssClass' => ' highlight ',
+            'injected' => 'value',
+        ]));
+
+        $this->controller->putAction($articleId, $request);
+
+        $data = $configuration->getData();
+        $this->assertSame('narrow', $data['layoutStyle'], 'Values outside of the template options fall back to its default.');
+        $this->assertArrayNotHasKey('showToc', $data, 'Fields removed for the template must not be stored.');
+        $this->assertFalse($data['showRelated']);
+        $this->assertSame(300, $data['readingSpeed']);
+        $this->assertSame('highlight', $data['customCssClass']);
+        $this->assertArrayNotHasKey('injected', $data);
+        $this->assertTrue($data['enableSidebar']);
+    }
+
+    public function testPutActionCastsDefaultFlagToBool(): void
+    {
+        $articleId = '123-456';
+        $this->mockArticleWithTemplateKey(TestSchemaFactory::BLOG_TEMPLATE);
+
+        $configuration = new ArticleConfiguration();
+        $this->repository->method('findByArticleId')->willReturn($configuration);
+        $this->repository->expects($this->once())->method('clearDefaultsForTemplate')->with(TestSchemaFactory::BLOG_TEMPLATE, $articleId);
+        $this->viewHandler->method('handle')->willReturn(new Response());
+
+        $this->controller->putAction($articleId, new Request([], [], [], [], [], [], json_encode(['default' => 1])));
+
+        $this->assertTrue($configuration->isDefault());
+    }
+
+    public function testGetActionUsesTemplateSchemaOfTheArticle(): void
+    {
+        $articleId = 'test-uuid';
+        $this->mockArticleWithTemplateKey(TestSchemaFactory::BLOG_TEMPLATE);
+
+        $configuration = new ArticleConfiguration();
+        $configuration->setArticleId($articleId);
+        $configuration->setTemplateKey('old_template');
+        $configuration->setData(['showToc' => true, 'layoutStyle' => 'wide']);
+        $this->repository->method('findByArticleId')->willReturn($configuration);
+
+        $this->viewHandler->expects($this->once())
+            ->method('handle')
+            ->with($this->callback(function (View $view): bool {
+                $data = $view->getData();
+
+                return TestSchemaFactory::BLOG_TEMPLATE === $data['templateKey']
+                    && 'wide' === $data['layoutStyle']
+                    && !\array_key_exists('showToc', $data);
+            }))
+            ->willReturn(new Response());
+
+        $this->controller->getAction($articleId, new Request());
+    }
+
+    public function testGetActionFallsBackToStoredTemplateKey(): void
+    {
+        $articleId = 'test-uuid';
+        $this->mockArticleWithTemplateKey(null);
+
+        $configuration = new ArticleConfiguration();
+        $configuration->setArticleId($articleId);
+        $configuration->setTemplateKey(TestSchemaFactory::BLOG_TEMPLATE);
+        $this->repository->method('findByArticleId')->willReturn($configuration);
+
+        $this->viewHandler->expects($this->once())
+            ->method('handle')
+            ->with($this->callback(static fn (View $view): bool => TestSchemaFactory::BLOG_TEMPLATE === $view->getData()['templateKey']
+                && !\array_key_exists('showToc', $view->getData())))
+            ->willReturn(new Response());
+
+        $this->controller->getAction($articleId, new Request());
     }
 }

@@ -15,13 +15,20 @@ class SuluArticleConfigurationExtension extends Extension implements PrependExte
     public function prepend(ContainerBuilder $container): void
     {
         if ($container->hasExtension('sulu_admin')) {
+            $formDirectories = [__DIR__ . '/../Resources/config/forms'];
+
+            $projectDirectory = $container->hasParameter('kernel.project_dir')
+                ? $container->getParameter('kernel.project_dir')
+                : null;
+            if (\is_string($projectDirectory) && \is_dir($projectDirectory . '/config/article_configuration')) {
+                $formDirectories[] = $projectDirectory . '/config/article_configuration';
+            }
+
             $container->prependExtensionConfig(
                 'sulu_admin',
                 [
                     'forms' => [
-                        'directories' => [
-                            __DIR__ . '/../Resources/config/forms',
-                        ],
+                        'directories' => $formDirectories,
                     ],
                     'resources' => [
                         'article_configurations' => [

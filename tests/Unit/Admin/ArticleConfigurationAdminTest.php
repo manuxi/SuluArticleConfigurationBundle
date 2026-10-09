@@ -5,17 +5,18 @@ declare(strict_types=1);
 namespace Manuxi\SuluArticleConfigurationBundle\Tests\Unit\Admin;
 
 use Manuxi\SuluArticleConfigurationBundle\Admin\ArticleConfigurationAdmin;
+use Manuxi\SuluArticleConfigurationBundle\Service\ArticleGroupProvider;
 use PHPUnit\Framework\TestCase;
 use Sulu\Bundle\AdminBundle\Admin\View\FormViewBuilderInterface;
 use Sulu\Bundle\AdminBundle\Admin\View\ViewBuilderFactoryInterface;
 use Sulu\Bundle\AdminBundle\Admin\View\ViewCollection;
-use Sulu\Bundle\AdminBundle\Metadata\GroupProviderInterface;
+use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\FormGroup;
 use Sulu\Component\Security\Authorization\SecurityCheckerInterface;
 
 class ArticleConfigurationAdminTest extends TestCase
 {
     private ViewBuilderFactoryInterface $viewBuilderFactory;
-    private GroupProviderInterface $groupProvider;
+    private ArticleGroupProvider $groupProvider;
     private SecurityCheckerInterface $securityChecker;
     private ArticleConfigurationAdmin $admin;
     private ViewCollection $viewCollection;
@@ -23,7 +24,7 @@ class ArticleConfigurationAdminTest extends TestCase
     protected function setUp(): void
     {
         $this->viewBuilderFactory = $this->createMock(ViewBuilderFactoryInterface::class);
-        $this->groupProvider = $this->createMock(GroupProviderInterface::class);
+        $this->groupProvider = $this->createMock(ArticleGroupProvider::class);
         $this->securityChecker = $this->createMock(SecurityCheckerInterface::class);
         $this->viewCollection = $this->createMock(ViewCollection::class);
 
@@ -34,37 +35,91 @@ class ArticleConfigurationAdminTest extends TestCase
         );
     }
 
-    public function testConfigureViews(): void
+    private function createFormViewBuilder(): FormViewBuilderInterface
     {
-        $group = new \stdClass();
-        $group->identifier = 'default';
-        $group->title = 'Default';
-
-        $this->groupProvider->method('getGroups')->willReturn([$group]);
-
         $formViewBuilder = $this->createMock(FormViewBuilderInterface::class);
-        $this->viewBuilderFactory->method('createFormViewBuilder')->willReturn($formViewBuilder);
+        foreach (['setResourceKey', 'setFormKey', 'setTabTitle', 'setTabOrder', 'setTabCondition', 'setParent', 'addToolbarActions'] as $method) {
+            $formViewBuilder->method($method)->willReturnSelf();
+        }
 
-        $formViewBuilder->method('setResourceKey')->willReturnSelf();
-        $formViewBuilder->method('setFormKey')->willReturnSelf();
-        $formViewBuilder->method('setTabTitle')->willReturnSelf();
-        $formViewBuilder->method('setTabOrder')->willReturnSelf();
-        $formViewBuilder->method('setParent')->willReturnSelf();
-        $formViewBuilder->method('addToolbarActions')->willReturnSelf();
+        return $formViewBuilder;
+    }
+
+    public function testConfigureViewsCreatesOneTabPerTemplateForEditAndAdd(): void
+    {
+        $this->groupProvider->method('getGroups')->willReturn([
+            'default' => new FormGroup('default', 'Default', ['article_blog', 'article_news']),
+        ]);
+
+        $created = [];
+        $formViewBuilder = $this->createFormViewBuilder();
+        $this->viewBuilderFactory
+            ->method('createFormViewBuilder')
+            ->willReturnCallback(function (string $name, string $path) use (&$created, $formViewBuilder) {
+                $created[$name] = $path;
+
+                return $formViewBuilder;
+            });
+
+        $formViewBuilder->expects($this->exactly(4))->method('setFormKey')
+            ->withConsecutive(
+                ['article_configuration_template_article_blog'],
+                ['article_configuration_template_article_blog'],
+                ['article_configuration_template_article_news'],
+                ['article_configuration_template_article_news']
+            );
+        $formViewBuilder->expects($this->exactly(4))->method('setTabCondition')
+            ->withConsecutive(
+                ["template == 'article_blog'"],
+                ["template == 'article_blog'"],
+                ["template == 'article_news'"],
+                ["template == 'article_news'"]
+            );
 
         $this->viewCollection->method('has')->willReturn(true);
-        $this->viewCollection->expects($this->exactly(2))->method('add');
+        $this->viewCollection->expects($this->exactly(4))->method('add');
+
+        $this->admin->configureViews($this->viewCollection);
+
+        $this->assertCount(4, $created);
+        $this->assertContains('/configuration/article_blog', $created);
+        $this->assertContains('/configuration/article_news', $created);
+    }
+
+    public function testConfigureViewsSkipsAddViewWhenNotPresent(): void
+    {
+        $this->groupProvider->method('getGroups')->willReturn([
+            'default' => new FormGroup('default', 'Default', ['article_blog']),
+        ]);
+        $this->viewBuilderFactory->method('createFormViewBuilder')->willReturn($this->createFormViewBuilder());
+
+        $this->viewCollection->method('has')->willReturnCallback(
+            static fn (string $name): bool => !\str_contains($name, 'add')
+        );
+        $this->viewCollection->expects($this->once())->method('add');
+
+        $this->admin->configureViews($this->viewCollection);
+    }
+
+    public function testConfigureViewsEscapesQuotesInTemplateKey(): void
+    {
+        $this->groupProvider->method('getGroups')->willReturn([
+            'default' => new FormGroup('default', 'Default', ["it's"]),
+        ]);
+        $formViewBuilder = $this->createFormViewBuilder();
+        $this->viewBuilderFactory->method('createFormViewBuilder')->willReturn($formViewBuilder);
+        $formViewBuilder->expects($this->atLeastOnce())->method('setTabCondition')->with("template == 'it\\'s'");
+
+        $this->viewCollection->method('has')->willReturn(true);
 
         $this->admin->configureViews($this->viewCollection);
     }
 
     public function testConfigureViewsSkipsWhenParentViewNotFound(): void
     {
-        $group = new \stdClass();
-        $group->identifier = 'default';
-        $group->title = 'Default';
-
-        $this->groupProvider->method('getGroups')->willReturn([$group]);
+        $this->groupProvider->method('getGroups')->willReturn([
+            'default' => new FormGroup('default', 'Default', ['article_blog']),
+        ]);
         $this->viewCollection->method('has')->willReturn(false);
         $this->viewCollection->expects($this->never())->method('add');
 

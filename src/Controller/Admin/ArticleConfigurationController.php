@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\View\ViewHandlerInterface;
 use Manuxi\SuluArticleConfigurationBundle\Entity\ArticleConfiguration;
 use Manuxi\SuluArticleConfigurationBundle\Repository\ArticleConfigurationRepository;
+use Manuxi\SuluArticleConfigurationBundle\Schema\ConfigurationSchema;
 use Sulu\Article\Domain\Repository\ArticleRepositoryInterface;
 use Sulu\Content\Application\ContentAggregator\ContentAggregatorInterface;
 use Sulu\Content\Domain\Model\DimensionContentInterface;
@@ -25,6 +26,7 @@ class ArticleConfigurationController extends AbstractRestController
         private EntityManagerInterface $entityManager,
         private ArticleRepositoryInterface $articleRepository,
         private ContentAggregatorInterface $contentAggregator,
+        private ConfigurationSchema $schema,
         ViewHandlerInterface $viewHandler
     ) {
         parent::__construct($viewHandler);
@@ -38,13 +40,15 @@ class ArticleConfigurationController extends AbstractRestController
     )]
     public function getAction(string $id, Request $request): Response
     {
+        $locale = $request->query->get('locale', 'en');
         $configuration = $this->repository->findByArticleId($id);
+        $templateKey = $this->getTemplateKeyFromArticle($id, $locale) ?? $configuration?->getTemplateKey();
 
         if (!$configuration) {
-            return $this->handleView($this->view($this->getDefaultData($id)));
+            return $this->handleView($this->view($this->getDefaultData($id, $templateKey)));
         }
 
-        return $this->handleView($this->view($this->serializeConfiguration($configuration)));
+        return $this->handleView($this->view($this->serializeConfiguration($configuration, $templateKey)));
     }
 
     #[Route(
@@ -69,31 +73,17 @@ class ArticleConfigurationController extends AbstractRestController
         $templateKey = $this->getTemplateKeyFromArticle($id, $locale);
         $configuration->setTemplateKey($templateKey);
 
-        $default = $data['default'] ?? false;
+        $default = (bool) ($data['default'] ?? false);
         if ($default && $templateKey) {
             $this->repository->clearDefaultsForTemplate($templateKey, $id);
         }
         $configuration->setDefault($default);
 
-        $configuration->setLayoutStyle($data['layoutStyle'] ?? 'fullwidth');
-        $configuration->setShowToc($data['showToc'] ?? true);
-        $configuration->setShowReadingTime($data['showReadingTime'] ?? true);
-        $configuration->setShowAuthorBox($data['showAuthorBox'] ?? true);
-        $configuration->setShowRelated($data['showRelated'] ?? true);
-
-        $configuration->setEnableSidebar($data['enableSidebar'] ?? true);
-        $configuration->setSidebarPosition($data['sidebarPosition'] ?? 'right');
-
-        $configuration->setEnableShareButtons($data['enableShareButtons'] ?? true);
-        $configuration->setEnablePrint($data['enablePrint'] ?? true);
-
-        $configuration->setHidePublishDate($data['hidePublishDate'] ?? false);
-
-        $configuration->setCustomCssClass($data['customCssClass'] ?? null);
+        $configuration->setData($this->schema->sanitize($templateKey, $data));
 
         $this->entityManager->flush();
 
-        return $this->handleView($this->view($this->serializeConfiguration($configuration)));
+        return $this->handleView($this->view($this->serializeConfiguration($configuration, $templateKey)));
     }
 
     private function getTemplateKeyFromArticle(string $articleId, string $locale): ?string
@@ -127,45 +117,35 @@ class ArticleConfigurationController extends AbstractRestController
         }
     }
 
-    private function getDefaultData(string $id): array
+    /**
+     * @return array<string, mixed>
+     */
+    private function getDefaultData(string $id, ?string $templateKey): array
     {
-        return [
-            'id' => $id,
-            'articleId' => $id,
-            'templateKey' => null,
-            'default' => false,
-            'layoutStyle' => 'fullwidth',
-            'showToc' => true,
-            'showReadingTime' => true,
-            'showAuthorBox' => true,
-            'showRelated' => true,
-            'enableSidebar' => true,
-            'sidebarPosition' => 'right',
-            'enableShareButtons' => true,
-            'enablePrint' => true,
-            'hidePublishDate' => false,
-            'customCssClass' => null,
-        ];
+        return \array_merge(
+            [
+                'id' => $id,
+                'articleId' => $id,
+                'templateKey' => $templateKey,
+                'default' => false,
+            ],
+            $this->schema->getDefaults($templateKey)
+        );
     }
 
-    private function serializeConfiguration(ArticleConfiguration $configuration): array
+    /**
+     * @return array<string, mixed>
+     */
+    private function serializeConfiguration(ArticleConfiguration $configuration, ?string $templateKey): array
     {
-        return [
-            'id' => $configuration->getArticleId(),
-            'articleId' => $configuration->getArticleId(),
-            'templateKey' => $configuration->getTemplateKey(),
-            'default' => $configuration->isDefault(),
-            'layoutStyle' => $configuration->getLayoutStyle(),
-            'showToc' => $configuration->isShowToc(),
-            'showReadingTime' => $configuration->isShowReadingTime(),
-            'showAuthorBox' => $configuration->isShowAuthorBox(),
-            'showRelated' => $configuration->isShowRelated(),
-            'enableSidebar' => $configuration->isEnableSidebar(),
-            'sidebarPosition' => $configuration->getSidebarPosition(),
-            'enableShareButtons' => $configuration->isEnableShareButtons(),
-            'enablePrint' => $configuration->isEnablePrint(),
-            'hidePublishDate' => $configuration->isHidePublishDate(),
-            'customCssClass' => $configuration->getCustomCssClass(),
-        ];
+        return \array_merge(
+            [
+                'id' => $configuration->getArticleId(),
+                'articleId' => $configuration->getArticleId(),
+                'templateKey' => $templateKey ?? $configuration->getTemplateKey(),
+                'default' => $configuration->isDefault(),
+            ],
+            $this->schema->sanitize($templateKey ?? $configuration->getTemplateKey(), $configuration->getData())
+        );
     }
 }

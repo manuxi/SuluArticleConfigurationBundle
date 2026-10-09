@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <entity name="Manuxi\SuluArticleConfigurationBundle\Entity\ArticleConfiguration"
+            table="ar_article_configuration"
+            repository-class="Manuxi\SuluArticleConfigurationBundle\Repository\ArticleConfigurationRepository">
+        <indexes>
+            <index name="idx_template_default" columns="template_key,is_default"/>
+        </indexes>
+
+        <id name="id" type="integer" column="id">
+            <generator strategy="AUTO"/>
+        </id>
+
+        <field name="articleId" type="string" column="article_id" length="36" unique="true"/>
+        <field name="templateKey" type="string" column="template_key" length="128" nullable="true"/>
+        <field name="default" type="boolean" column="is_default">
+            <options>
+                <option name="default">0</option>
+            </options>
+        </field>
+        <field name="data" type="json" column="data" nullable="true"/>
+    </entity>
+</doctrine-mapping>

@@ -32,7 +32,7 @@ class ArticleConfigurationExtension extends AbstractExtension
      * Fallback chain:
      * 1. Article-specific config
      * 2. Template default (default=true)
-     * 3. Hardcoded defaults
+     * 3. Defaults of the configured schema
      *
      * Usage:
      *   {% set config = article_configuration(article.id, article.templateKey) %}
@@ -42,7 +42,7 @@ class ArticleConfigurationExtension extends AbstractExtension
      * The returned array includes 'configSource' which can be:
      * - 'article': Config from this specific article
      * - 'template_default': Config from another article marked as default
-     * - 'hardcoded': Built-in defaults
+     * - 'hardcoded': Defaults of the configured schema
      */
     public function getConfiguration(string $articleId, ?string $templateKey = null): array
     {
