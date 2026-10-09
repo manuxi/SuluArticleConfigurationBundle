@@ -15,7 +15,8 @@ permissions:
   contents: read
 
 jobs:
-  symfony-tests:
+  symfony-tests-matrix:
+    name: symfony-tests (${{ matrix.sulu }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -52,3 +53,16 @@ jobs:
       env:
         DATABASE_URL: sqlite:///%kernel.project_dir%/data/database.sqlite
       run: vendor/bin/phpunit
+
+  # Required status check "symfony-tests": one stable name, independent of the matrix entries
+  symfony-tests:
+    needs: symfony-tests-matrix
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+    - name: All Sulu versions passed
+      run: |
+        if [ "${{ needs.symfony-tests-matrix.result }}" != "success" ]; then
+          echo "Matrix result: ${{ needs.symfony-tests-matrix.result }}"
+          exit 1
+        fi

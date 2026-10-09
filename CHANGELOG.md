@@ -54,6 +54,8 @@
 - The dry run of the migration command says "Would add column" instead of "Adding column".
 - CI runs the suite against Sulu 3.0.0 and the latest 3.0 release (matrix in both workflows); the suite was also run
   against 3.0.3 and 3.0.10.
+  The aggregate jobs `build` and `symfony-tests` report the overall result under the names required by the branch
+  protection.
 - CI: `phpunit/phpunit` is required as `^9.6` instead of the exact version 9.6.0, which Composer blocks because of a
   security advisory; the test step of the PHP workflow is enabled.
 

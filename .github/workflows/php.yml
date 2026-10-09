@@ -10,7 +10,8 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  build-matrix:
+    name: build (${{ matrix.sulu }})
 
     runs-on: ubuntu-latest
 
@@ -46,3 +47,16 @@ jobs:
 
     - name: Run test suite
       run: composer run-script test
+
+  # Required status check "build": one stable name, independent of the matrix entries
+  build:
+    needs: build-matrix
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+    - name: All Sulu versions passed
+      run: |
+        if [ "${{ needs.build-matrix.result }}" != "success" ]; then
+          echo "Matrix result: ${{ needs.build-matrix.result }}"
+          exit 1
+        fi
